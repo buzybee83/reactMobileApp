@@ -1,16 +1,17 @@
 import { AsyncStorage } from 'react-native';
 import createDataContext from './createDataContext';
 import clientAPI from '../clientAPI/api';
-import { navigate, resetNavigation } from '../services/navServices';
+import { navigate, resetNavigation } from '../services/navigationServices';
 
 const authReducer = (state, action) => {
-    console.log('ACTION === ', action)
+    console.log('AUTHREDUCER ACTION === ', action);
+    console.log('AUTHREDUCER STATE === ', state);
     switch (action.type) {
+        case 'RESTORE_TOKEN':
         case 'LOGIN':
             return { errorMessage: '', userToken: action.payload, isLoggedIn: true };
         case 'LOGOUT':
             return { errorMessage: '', userToken: null, isLoggedIn: false };
-        case 'RESTORE_TOKEN':
         case 'HAS_ERROR':
             return { ...state, errorMessage: action.payload, isLoggedIn: false };
         case 'CLEAR_ERROR':
@@ -29,7 +30,7 @@ const signup = dispatch => async ({ email, password }) => {
         const response = await clientAPI.post('/signup', { email, password });
         await AsyncStorage.setItem('userToken', response.data.token);
         dispatch({ type: 'LOGIN', payload: response.data.token });
-        navigate('Root');
+        navigate('Home');
     } catch (err) {
         const errorMssg = err.response.data.errmsg && err.response.data.errmsg.includes('duplicate') ?
             'An account with this email already exists. Try loging in or reset your password' :
@@ -46,7 +47,7 @@ const login = dispatch => async ({ email, password }) => {
         const response = await clientAPI.post('/login', { email, password });
         await AsyncStorage.setItem('userToken', response.data.token);
         dispatch({ type: 'LOGIN', payload: response.data.token });
-        navigate('Root');
+        navigate('Home');
     } catch (err) {
         console.log('LOGIN ERROR == ', err);
         const errorMssg = err.response.data.error? 
@@ -67,6 +68,7 @@ const logout = dispatch => async () => {
         resetNavigation();
         navigate('Auth');
     } catch (err) {
+        // Something went wrong but we still want to send user to login screen
         console.log('LOGOUT ERROR ===> ', err)
         navigate('Auth');
     }

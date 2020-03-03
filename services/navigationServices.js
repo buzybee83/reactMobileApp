@@ -16,7 +16,10 @@ function navigate(routeName, params) {
 }
 function resetNavigation() {
   navigator.dispatch(
-    CommonActions.reset()
+    CommonActions.reset({
+      index: 0,
+      routes: [{ name: 'Root' }],
+    })
   );
 }
 

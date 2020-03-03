@@ -11,7 +11,7 @@ import { Provider as AuthProvider, Constext as AuthContext } from './context/Aut
 import BottomTabNavigator from './navigation/BottomTabNavigator';
 import AuthNavigator from './navigation/AuthNavigator';
 import useLinking from './navigation/useLinking';
-import { setTopNavigator } from './services/navServices';
+import { setTopNavigator } from './services/navigationServices';
 
 const Stack = createStackNavigator();
 
