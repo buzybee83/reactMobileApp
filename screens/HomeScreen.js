@@ -1,11 +1,20 @@
 import * as React from 'react';
 import { Image, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useNavigationState } from '@react-navigation/native';
 import { ScrollView } from 'react-native-gesture-handler';
 import * as WebBrowser from 'expo-web-browser';
-
+import { Context as AuthContext } from '../context/AuthContext';
 import { MonoText } from '../components/StyledText';
 
 export default function HomeScreen() {
+  const { bootstrapAuthAsync } = React.useContext(AuthContext);
+  const routes = useNavigationState(state => state);
+  console.log('ROUTES ::: ', routes);
+  React.useLayoutEffect(() => {
+    console.log('LAYOUTEFFECT CALLED :: HOMESCREEN');
+    bootstrapAuthAsync();
+  }, []);
+
   return (
     <View style={styles.container}>
       <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
@@ -52,9 +61,9 @@ export default function HomeScreen() {
   );
 }
 
-HomeScreen.navigationOptions = {
-  header: null,
-};
+// HomeScreen.navigationOptions = {
+//   header: null,
+// };
 
 function DevelopmentModeNotice() {
   if (__DEV__) {

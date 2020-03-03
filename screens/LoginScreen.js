@@ -7,13 +7,8 @@ import NavLink from '../components/NavLink';
 import Spacer from '../components/Spacer';
 
 const LoginScreen = ({ navigation }) => {
-    const { state, login, clearErrorMessage, bootstrapAuthAsync } = useContext(AuthContext);
+    const { state, login, clearErrorMessage } = useContext(AuthContext);
     
-    useLayoutEffect(() => {
-        console.log('LAYOUTEFFECT CALLED');
-        // bootstrapAuthAsync();
-    },[]);
-
     useFocusEffect(
         React.useCallback(() => {
             return () => {

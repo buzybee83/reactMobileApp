@@ -26,3 +26,7 @@ export default function AuthNavigator({ navigation, route }) {
   );
 }
 
+AuthNavigator.navigationOptions = {
+  header: null,
+}
+

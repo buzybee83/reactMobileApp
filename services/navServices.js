@@ -9,13 +9,19 @@ function setTopNavigator(navigatorRef) {
 function navigate(routeName, params) {
   navigator.dispatch(
     CommonActions.navigate({
-      routeName,
+      name: routeName,
       params,
     })
+  );
+}
+function resetNavigation() {
+  navigator.dispatch(
+    CommonActions.reset()
   );
 }
 
 export {
   navigate,
   setTopNavigator,
+  resetNavigation
 };

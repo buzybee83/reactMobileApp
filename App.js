@@ -1,5 +1,5 @@
 import React from 'react';
-import { AsyncStorage } from 'react-native'
+import { AsyncStorage } from 'react-native';
 import { Platform, StatusBar, StyleSheet } from 'react-native';
 import { SplashScreen } from 'expo';
 import * as Font from 'expo-font';
@@ -50,7 +50,7 @@ export default function App({ navigation, ...props }) {
 		}
 
 		loadResourcesAndDataAsync();
-		
+
 	}, []);
 
 	if (!isLoadingComplete && !props.skipLoadingScreen) {
@@ -63,17 +63,19 @@ export default function App({ navigation, ...props }) {
 					ref={containerRef => setTopNavigator(containerRef)}
 					initialState={initialNavigationState}
 				>
-					<Stack.Navigator
-						headerMode="none">
-						{!isLoggedIn ? (
-							<Stack.Screen
-								name="Auth"
-								component={AuthNavigator}
-							/>) : (
-								<Stack.Screen
-									name="Root"
-									component={BottomTabNavigator}
-								/>)}
+					<Stack.Navigator initialRouteName={isLoggedIn ? 'Root' : 'Auth'}>
+						<Stack.Screen
+							name="Auth"
+							component={AuthNavigator}
+							options={{
+								headerShown: false,
+								headerLeft: null,
+							}}
+						/>
+						<Stack.Screen
+							name="Root"
+							component={BottomTabNavigator}
+						/>
 					</Stack.Navigator>
 				</NavigationContainer>
 			</AuthProvider>

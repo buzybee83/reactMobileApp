@@ -1,7 +1,7 @@
 import { AsyncStorage } from 'react-native';
 import createDataContext from './createDataContext';
 import clientAPI from '../clientAPI/api';
-import { navigate } from '../services/navServices';
+import { navigate, resetNavigation } from '../services/navServices';
 
 const authReducer = (state, action) => {
     console.log('ACTION === ', action)
@@ -10,6 +10,7 @@ const authReducer = (state, action) => {
             return { errorMessage: '', userToken: action.payload, isLoggedIn: true };
         case 'LOGOUT':
             return { errorMessage: '', userToken: null, isLoggedIn: false };
+        case 'RESTORE_TOKEN':
         case 'HAS_ERROR':
             return { ...state, errorMessage: action.payload, isLoggedIn: false };
         case 'CLEAR_ERROR':
@@ -31,7 +32,7 @@ const signup = dispatch => async ({ email, password }) => {
         navigate('Root');
     } catch (err) {
         const errorMssg = err.response.data.errmsg && err.response.data.errmsg.includes('duplicate') ?
-            'An account with this email already exists. Try to login or reset your password' :
+            'An account with this email already exists. Try loging in or reset your password' :
             'Something went wrong while trying to create your account.';
         dispatch({
             type: 'HAS_ERROR',
@@ -41,39 +42,49 @@ const signup = dispatch => async ({ email, password }) => {
 };
 
 const login = dispatch => async ({ email, password }) => {
-    console.log('LOGIN START===', { email, password })
     try {
         const response = await clientAPI.post('/login', { email, password });
-        console.log('LOGIN RESPONSE===', response)
         await AsyncStorage.setItem('userToken', response.data.token);
         dispatch({ type: 'LOGIN', payload: response.data.token });
         navigate('Root');
     } catch (err) {
-        console.log('LOGIN ERROR == ', err.response.data.error)
+        console.log('LOGIN ERROR == ', err);
+        const errorMssg = err.response.data.error? 
+            err.response.data.error : 
+            'Something went wrong while tryign to log you in, please try later.';
         dispatch({
             type: 'HAS_ERROR',
-            payload: err.response.data.error
+            payload: errorMssg
         });
     }
-}
+};
 
 
 const logout = dispatch => async () => {
     try {
         await AsyncStorage.removeItem('userToken');
         dispatch({ type: 'LOGOUT' });
+        resetNavigation();
         navigate('Auth');
     } catch (err) {
         console.log('LOGOUT ERROR ===> ', err)
-        dispatch({
-            type: 'HAS_ERROR',
-            payload: err.response.data.error
-        });
+        navigate('Auth');
     }
 };
 
+const bootstrapAuthAsync = dispatch => async () => {
+    try {
+        const userToken = await AsyncStorage.getItem('userToken');
+        dispatch({ type: 'RESTORE_TOKEN', payload: userToken });
+    } catch (err) {
+        // No user token
+        navigate('Auth');
+    }
+    
+} 
+
 export const { Provider, Context } = createDataContext(
     authReducer,
-    { signup, login, logout, clearErrorMessage },
+    { signup, login, logout, clearErrorMessage, bootstrapAuthAsync },
     { isLoggedIn: false, errorMessage: '' }
 );
