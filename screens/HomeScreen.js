@@ -6,8 +6,9 @@ import { Context as AuthContext } from '../context/AuthContext';
 import { MonoText } from '../components/StyledText';
 
 export default function HomeScreen() {
-  const { state, bootstrapAuthAsync } = React.useContext(AuthContext);
-  
+  const { bootstrapAuthAsync } = React.useContext(AuthContext);
+  const routes = useNavigationState(state => state);
+  console.log('ROUTES ::: ', routes);
   React.useLayoutEffect(() => {
     console.log('LAYOUTEFFECT CALLED :: HOMESCREEN');
     if (!state.isAuthenticated) bootstrapAuthAsync();

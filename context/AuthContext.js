@@ -4,8 +4,7 @@ import clientAPI from '../clientAPI/api';
 import { switchNavigation, resetNavigation } from '../services/navigationServices';
 
 const authReducer = (state, action) => {
-    console.log('AUTHREDUCER ACTION === ', action);
-    console.log('AUTHREDUCER STATE === ', state);
+    console.log('ACTION === ', action)
     switch (action.type) {
         case 'RESTORE_TOKEN':
         case 'LOGIN':
@@ -30,7 +29,8 @@ const signup = dispatch => async ({ email, password }) => {
         const response = await clientAPI.post('/signup', { email, password });
         await AsyncStorage.setItem('userToken', response.data.token);
         dispatch({ type: 'LOGIN', payload: response.data.token });
-        switchNavigation('Root', {screen: 'Home'});
+        switchNavigation('Root');
+
     } catch (err) {
         const errorMssg = err.response.data.errmsg && err.response.data.errmsg.includes('duplicate') ?
             'An account with this email already exists. Try loging in or reset your password' :
@@ -68,7 +68,6 @@ const logout = dispatch => async () => {
         resetNavigation();
         // navigate('Auth');
     } catch (err) {
-        // Something went wrong but we still want to send user to login screen
         console.log('LOGOUT ERROR ===> ', err)
         resetNavigation();
     }
