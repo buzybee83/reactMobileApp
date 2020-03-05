@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Text, Input, Button } from 'react-native-elements';
+import { StyleSheet } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { InputIcon } from '../components/Icons';
 import Colors from '../constants/Colors';
 import Spacer from '../components/Spacer';
@@ -7,6 +9,15 @@ import Spacer from '../components/Spacer';
 function AuthForm({ headerText, errorMessage, submitButtonText, onSubmit }) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+
+    useFocusEffect(
+        React.useCallback(() => {
+            return () => {
+                setEmail('');
+                setPassword('');
+            };
+        }, [])
+    );
 
     return (
         <>
@@ -25,7 +36,6 @@ function AuthForm({ headerText, errorMessage, submitButtonText, onSubmit }) {
                 onChangeText={setEmail}
                 autoCapitalize="none"
                 autoCorrect={false}
-                autoFocus={true}
             />
             <Spacer size={7}/>
             <Input
@@ -52,3 +62,10 @@ function AuthForm({ headerText, errorMessage, submitButtonText, onSubmit }) {
 }
 
 export default AuthForm;
+
+const styles = StyleSheet.create({
+    authScreen: {
+        padding: 34,
+        alignSelf: 'baseline'
+    }
+});

@@ -1,13 +1,13 @@
 import React from 'react';
 import { AsyncStorage } from 'react-native';
-import { Platform, StatusBar, StyleSheet } from 'react-native';
+import { Platform, StatusBar } from 'react-native';
 import { SplashScreen } from 'expo';
 import * as Font from 'expo-font';
 import { Ionicons } from '@expo/vector-icons';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 
-import { Provider as AuthProvider, Constext as AuthContext } from './context/AuthContext';
+import { Provider as AuthProvider } from './context/AuthContext';
 import BottomTabNavigator from './navigation/BottomTabNavigator';
 import AuthNavigator from './navigation/AuthNavigator';
 import useLinking from './navigation/useLinking';
@@ -20,7 +20,7 @@ export default function App({ navigation, ...props }) {
 	const [initialNavigationState, setInitialNavigationState] = React.useState();
 	const containerRef = React.useRef();
 	const { getInitialState } = useLinking(containerRef);
-	const [isLoggedIn, setAuthState] = React.useState(false);
+	const [isAuthenticated, setAuthState] = React.useState(false);
 
 	// Load any resources or data that we need prior to rendering the app
 	React.useEffect(() => {
@@ -58,23 +58,28 @@ export default function App({ navigation, ...props }) {
 	} else {
 		return (
 			<AuthProvider>
-				{Platform.OS === 'ios' && <StatusBar barStyle="default" />}
+				{Platform.OS === 'ios' && <StatusBar barStyle="dark-content" />}
 				<NavigationContainer
 					ref={containerRef => setTopNavigator(containerRef)}
 					initialState={initialNavigationState}
 				>
-					<Stack.Navigator initialRouteName={isLoggedIn ? 'Root' : 'Auth'}>
+					<Stack.Navigator initialRouteName={isAuthenticated ? 'Root' : 'Auth'}>
 						<Stack.Screen
 							name="Auth"
 							component={AuthNavigator}
 							options={{
-								headerShown: false,
 								headerLeft: null,
+								headerShown: false,
+								animationTypeForReplace: isAuthenticated ? 'pop' : 'push',
 							}}
 						/>
 						<Stack.Screen
 							name="Root"
 							component={BottomTabNavigator}
+							options={{
+								headerLeft: null,
+								animationTypeForReplace: isAuthenticated ? 'pop' : 'push',
+							}}
 						/>
 					</Stack.Navigator>
 				</NavigationContainer>
@@ -83,9 +88,3 @@ export default function App({ navigation, ...props }) {
 	}
 }
 
-const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-		backgroundColor: '#fff',
-	},
-});

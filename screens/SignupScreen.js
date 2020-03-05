@@ -1,6 +1,7 @@
 import React, { useContext } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { StyleSheet, KeyboardAvoidingView } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
+import { Card } from 'react-native-elements';
 import { Context as AuthContext } from '../context/AuthContext';
 import AuthForm from '../components/AuthForm';
 import NavLink from '../components/NavLink';
@@ -19,23 +20,26 @@ const SignupScreen = ({ navigation }) => {
     );
 
     return (
-        <View style={styles.container} >
-            <AuthForm
-                headerText="Creat a Free Account"
-                errorMessage={state.errorMessage}
-                submitButtonText="Signup"
-                onSubmit={signup}
-            />
-            <Spacer size={34}/>
-            <NavLink routeName="Login" text="Already have an account?" />
-        </View>
-    )
-}
+        <KeyboardAvoidingView style={styles.container} behavior="padding">
+            <Card>
+                <AuthForm
+                    headerText="Creat a Free Account"
+                    errorMessage={state.errorMessage}
+                    submitButtonText="Signup"
+                    onSubmit={signup}
+                />
+                <Spacer size={34} />
+                <NavLink routeName="Login" text="Already have an account?" />
+            </Card>
+        </KeyboardAvoidingView>
+    );
+};
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 24
+        alignContent: 'center',
+        justifyContent: 'center',
     }
 });
 

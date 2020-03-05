@@ -6,7 +6,7 @@ import * as WebBrowser from 'expo-web-browser';
 import { Context as AuthContext } from '../context/AuthContext';
 
 export default function HomeScreen({ navigation }) {
-    const { state, logout } = useContext(AuthContext);
+    const { logout } = useContext(AuthContext);
 
     return (
         <View style={styles.container}>

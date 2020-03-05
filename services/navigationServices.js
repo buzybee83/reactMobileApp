@@ -1,4 +1,4 @@
-import { CommonActions } from '@react-navigation/native';
+import { CommonActions, StackActions } from '@react-navigation/native';
 
 let navigator;
 
@@ -14,17 +14,25 @@ function navigate(routeName, params) {
     })
   );
 }
+
+function switchNavigation(routeName, params) {
+  navigator.dispatch(
+    StackActions.push(
+      routeName,
+      params,
+    )
+  );
+}
+
 function resetNavigation() {
   navigator.dispatch(
-    CommonActions.reset({
-      index: 0,
-      routes: [{ name: 'Root' }],
-    })
+    StackActions.replace('Auth')
   );
 }
 
 export {
-  navigate,
   setTopNavigator,
+  switchNavigation,
+  navigate,
   resetNavigation
 };

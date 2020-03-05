@@ -1,6 +1,5 @@
 import * as React from 'react';
-import { Image, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { useNavigationState } from '@react-navigation/native';
+import { Image, Platform, StyleSheet, Text, TouchableOpacity, View, SafeAreaView } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import * as WebBrowser from 'expo-web-browser';
 import { Context as AuthContext } from '../context/AuthContext';
@@ -11,11 +10,11 @@ export default function HomeScreen() {
   
   React.useLayoutEffect(() => {
     console.log('LAYOUTEFFECT CALLED :: HOMESCREEN');
-    if (!state.isLoggedIn) bootstrapAuthAsync();
-  }, []);
+    if (!state.isAuthenticated) bootstrapAuthAsync();
+  });
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
         <View style={styles.welcomeContainer}>
           <Image
@@ -56,13 +55,13 @@ export default function HomeScreen() {
           <MonoText style={styles.codeHighlightText}>navigation/BottomTabNavigator.js</MonoText>
         </View>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
-// HomeScreen.navigationOptions = {
-//   header: null,
-// };
+HomeScreen.navigationOptions = {
+  header: null,
+};
 
 function DevelopmentModeNotice() {
   if (__DEV__) {
