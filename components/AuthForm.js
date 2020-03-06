@@ -1,20 +1,23 @@
 import React, { useState } from 'react';
 import { Text, Input, Button } from 'react-native-elements';
-import { StyleSheet } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { InputIcon } from '../components/Icons';
 import Colors from '../constants/Colors';
 import Spacer from '../components/Spacer';
 
-function AuthForm({ headerText, errorMessage, submitButtonText, onSubmit }) {
+function AuthForm({ type, headerText, errorMessage, submitButtonText, onSubmit }) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
 
     useFocusEffect(
         React.useCallback(() => {
             return () => {
                 setEmail('');
                 setPassword('');
+                setFirstName('');
+                setLastName('');
             };
         }, [])
     );
@@ -22,7 +25,39 @@ function AuthForm({ headerText, errorMessage, submitButtonText, onSubmit }) {
     return (
         <>
             <Text h4 style={{ textAlign: "center" }}>{headerText}</Text>
-            <Spacer size={8}/>
+            <Spacer size={8} />
+            {type == 'Signup' &&
+                <>
+                    <Input
+                        leftIcon={
+                            <InputIcon
+                                class="leftIcon"
+                                name="md-person"
+                                size={24}
+                            />
+                        }
+                        placeholder="First Name"
+                        value={firstName}
+                        onChangeText={setFirstName}
+                        autoCorrect={false}
+                    />
+                    <Spacer size={2} />
+                    <Input
+                        leftIcon={
+                            <InputIcon
+                                class="leftIcon"
+                                name="md-person"
+                                size={24}
+                            />
+                        }
+                        placeholder="Last Name"
+                        value={lastName}
+                        onChangeText={setLastName}
+                        autoCorrect={false}
+                    />
+                    <Spacer size={2} />
+                </>
+            }
             <Input
                 leftIcon={
                     <InputIcon
@@ -37,7 +72,7 @@ function AuthForm({ headerText, errorMessage, submitButtonText, onSubmit }) {
                 autoCapitalize="none"
                 autoCorrect={false}
             />
-            <Spacer size={7}/>
+            <Spacer size={7} />
             <Input
                 leftIcon={
                     <InputIcon
@@ -53,19 +88,22 @@ function AuthForm({ headerText, errorMessage, submitButtonText, onSubmit }) {
                 autoCorrect={false}
                 secureTextEntry
             />
-            <Spacer size={1}/>
-            <Text style={{color: Colors.errorText}}>{errorMessage}</Text>
-            <Spacer size={8} />   
-            <Button title={submitButtonText} onPress={() => onSubmit({ email, password })} />
+            <Spacer size={1} />
+            <Text style={{ color: Colors.errorText }}>{errorMessage}</Text>
+            <Spacer size={8} />
+            <Button
+                title={submitButtonText}
+                onPress={() =>
+                    type == 'Signup' ?
+                        onSubmit({ firstName, lastName, email, password }) :
+                        onSubmit({ email, password })}
+            />
         </>
     );
 }
 
 export default AuthForm;
 
-const styles = StyleSheet.create({
-    authScreen: {
-        padding: 34,
-        alignSelf: 'baseline'
-    }
-});
+
+
+

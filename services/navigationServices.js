@@ -33,6 +33,6 @@ function resetNavigation() {
 export {
   setTopNavigator,
   switchNavigation,
+  resetNavigation,
   navigate,
-  resetNavigation
 };

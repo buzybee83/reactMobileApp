@@ -35,9 +35,9 @@ export default function App({ navigation, ...props }) {
 					...Ionicons.font,
 					'space-mono': require('./assets/fonts/SpaceMono-Regular.ttf'),
 				});
-				const userToken = await AsyncStorage.getItem('userToken');
-				console.log('userToken === ', userToken)
-				if (userToken) {
+				const currentUser = await AsyncStorage.getItem('currentUser');
+				console.log('userToken === ', currentUser)
+				if (currentUser) {
 					setAuthState(true);
 				}
 			} catch (e) {

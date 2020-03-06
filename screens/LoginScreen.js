@@ -19,7 +19,7 @@ const LoginScreen = ({ navigation }) => {
     );
 
     return (
-        <KeyboardAvoidingView style={styles.container} behavior="padding">
+        <KeyboardAvoidingView style={styles.container} behavior={Platform.OS == 'ios'? "padding" : "height"}>
             <Card>
                 <AuthForm
                     headerText="Welcome"

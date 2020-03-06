@@ -1,6 +1,7 @@
 import React, { useContext } from 'react';
-import { StyleSheet, KeyboardAvoidingView } from 'react-native';
+import { Platform, StyleSheet, KeyboardAvoidingView, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scrollview';
 import { Card } from 'react-native-elements';
 import { Context as AuthContext } from '../context/AuthContext';
 import AuthForm from '../components/AuthForm';
@@ -20,26 +21,32 @@ const SignupScreen = ({ navigation }) => {
     );
 
     return (
-        <KeyboardAvoidingView style={styles.container} behavior="padding">
-            <Card>
-                <AuthForm
-                    headerText="Creat a Free Account"
-                    errorMessage={state.errorMessage}
-                    submitButtonText="Signup"
-                    onSubmit={signup}
-                />
-                <Spacer size={34} />
-                <NavLink routeName="Login" text="Already have an account?" />
-            </Card>
-        </KeyboardAvoidingView>
+        <KeyboardAwareScrollView contentContainerStyle={styles.container}>
+            <View style={styles.card}>
+                <Card>
+                    <AuthForm
+                        type="Signup"
+                        headerText="Creat a Free Account"
+                        errorMessage={state.errorMessage}
+                        submitButtonText="Signup"
+                        onSubmit={signup}
+                    />
+                    <Spacer size={34} />
+                    <NavLink routeName="Login" text="Already have an account?" />
+                </Card>
+            </View>
+        </KeyboardAwareScrollView>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+    },
+    card: {
+        flex: 1,
         alignContent: 'center',
-        justifyContent: 'center',
+        justifyContent: 'center'
     }
 });
 

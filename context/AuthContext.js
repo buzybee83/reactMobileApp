@@ -24,15 +24,17 @@ const clearErrorMessage = dispatch => () => {
     dispatch({ type: 'CLEAR_ERROR' });
 };
 
-const signup = dispatch => async ({ email, password }) => {
+const signup = dispatch => async ({ firstName, lastName, email, password }) => {
+    console.log('SIGNUP HAPPENING')
     try {
-        const response = await clientAPI.post('/signup', { email, password });
-        await AsyncStorage.setItem('userToken', response.data.token);
+        const response = await clientAPI.post('/signup', { firstName, lastName, email, password });
+        console.log('SIGNUP RESPONSE === ', response.data)
+        await AsyncStorage.setItem('currentUser', JSON.stringify(response.data));
         dispatch({ type: 'LOGIN', payload: response.data.token });
         switchNavigation('Root');
-
     } catch (err) {
-        const errorMssg = err.response.data.errmsg && err.response.data.errmsg.includes('duplicate') ?
+        console.log('SIGNUP ERROR ==== ', err)
+        const errorMssg = err.response && err.response.data.errmsg && err.response.data.errmsg.includes('duplicate') ?
             'An account with this email already exists. Try loging in or reset your password' :
             'Something went wrong while trying to create your account.';
         dispatch({
@@ -45,7 +47,7 @@ const signup = dispatch => async ({ email, password }) => {
 const login = dispatch => async ({ email, password }) => {
     try {
         const response = await clientAPI.post('/login', { email, password });
-        await AsyncStorage.setItem('userToken', response.data.token);
+        await AsyncStorage.setItem('currentUser', JSON.stringify(response.data));
         dispatch({ type: 'LOGIN', payload: response.data.token });
         switchNavigation('Root');
     } catch (err) {
@@ -63,7 +65,7 @@ const login = dispatch => async ({ email, password }) => {
 
 const logout = dispatch => async () => {
     try {
-        await AsyncStorage.removeItem('userToken');
+        await AsyncStorage.removeItem('currentUser');
         dispatch({ type: 'LOGOUT' });
         resetNavigation();
         // navigate('Auth');
@@ -75,9 +77,10 @@ const logout = dispatch => async () => {
 
 const bootstrapAuthAsync = dispatch => async () => {
     try {
-        const userToken = await AsyncStorage.getItem('userToken');
-        if (userToken) {
-            dispatch({ type: 'RESTORE_TOKEN', payload: userToken });
+        const currentUser = await AsyncStorage.getItem('currentUser');
+        if (currentUser) {
+            console.log(currentUser)
+            dispatch({ type: 'RESTORE_TOKEN', payload: JSON.parse(currentUser).token });
         } else {
             // No token found!
             resetNavigation();
