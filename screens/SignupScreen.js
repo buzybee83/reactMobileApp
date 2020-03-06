@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { Platform, StyleSheet, KeyboardAvoidingView, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scrollview';
 import { Card } from 'react-native-elements';
@@ -22,7 +22,7 @@ const SignupScreen = ({ navigation }) => {
 
     return (
         <KeyboardAwareScrollView contentContainerStyle={styles.container}>
-            <View style={styles.card}>
+            <View style={styles.cardContainer}>
                 <Card>
                     <AuthForm
                         type="Signup"
@@ -43,7 +43,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
     },
-    card: {
+    cardContainer: {
         flex: 1,
         alignContent: 'center',
         justifyContent: 'center'
