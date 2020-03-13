@@ -7,9 +7,9 @@ import { MonoText } from '../components/StyledText';
 
 export default function HomeScreen() {
   const { state, bootstrapAuthAsync } = React.useContext(AuthContext);
-  React.useLayoutEffect(() => {
+  React.useLayoutEffect(() => async () => {
     console.log('LAYOUTEFFECT CALLED :: HOMESCREEN');
-    if (!state.isAuthenticated) bootstrapAuthAsync();
+    if (!state.isAuthenticated) await bootstrapAuthAsync();
   });
 
   return (
@@ -65,7 +65,7 @@ HomeScreen.navigationOptions = {
 function DevelopmentModeNotice() {
   if (__DEV__) {
     const learnMoreButton = (
-      <Text onPress={handleLearnMorePress} style={styles.helpLinkText}>
+      <Text style={styles.helpLinkText}>
         Learn more
       </Text>
     );
@@ -83,10 +83,6 @@ function DevelopmentModeNotice() {
       </Text>
     );
   }
-}
-
-function handleLearnMorePress() {
-  WebBrowser.openBrowserAsync('https://docs.expo.io/versions/latest/workflow/development-mode/');
 }
 
 function handleHelpPress() {

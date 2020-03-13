@@ -1,12 +1,14 @@
 import { AsyncStorage } from 'react-native';
-import createDataContext from './createDataContext';
+import createDataContext from './AuthProviderContext';
 import clientAPI from '../clientAPI/api';
 import { switchNavigation, resetNavigation } from '../services/navigationServices';
 
 const authReducer = (state, action) => {
-    console.log('ACTION === ', action)
+    console.log('ACTION === ', action);
+    console.log('STATE === ', state);
     switch (action.type) {
         case 'RESTORE_TOKEN':
+            return { ...state, userToken: action.payload, isAuthenticated: true };
         case 'LOGIN':
             return { errorMessage: '', userToken: action.payload, isAuthenticated: true };
         case 'LOGOUT':
@@ -79,7 +81,7 @@ const bootstrapAuthAsync = dispatch => async () => {
     try {
         const currentUser = await AsyncStorage.getItem('currentUser');
         if (currentUser) {
-            console.log(currentUser)
+            console.log('RESTORE_USER === ', currentUser)
             dispatch({ type: 'RESTORE_TOKEN', payload: JSON.parse(currentUser).token });
         } else {
             // No token found!

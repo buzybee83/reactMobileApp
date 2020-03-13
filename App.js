@@ -36,7 +36,7 @@ export default function App({ navigation, ...props }) {
 					'space-mono': require('./assets/fonts/SpaceMono-Regular.ttf'),
 				});
 				const currentUser = await AsyncStorage.getItem('currentUser');
-				console.log('userToken === ', currentUser)
+				console.log('**APP** LOADING CURRENT USER === ', currentUser)
 				if (currentUser) {
 					setAuthState(true);
 				}
