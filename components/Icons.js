@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet } from 'react-native';
 
-import Colors from '../constants/Colors';
+import { Constants } from '../constants/Theme';
 
 function TabBarIcon(props) {
   return (
@@ -10,7 +10,7 @@ function TabBarIcon(props) {
       name={props.name}
       size={30}
       style={{ marginBottom: -3 }}
-      color={props.focused ? Colors.iconSelected : Colors.iconDefault}
+      color={props.focused ? Constants.iconSelected : Constants.iconDefault}
     />
   );
 }
@@ -21,7 +21,7 @@ function InputIcon(props) {
       name={props.name}
       size={props.size}
       style={styles[props.class]}
-      color={props.focused ? Colors.iconSelected : Colors.iconDefault}
+      color={props.focused ? Constants.iconSelected : Constants.iconDefault}
     />
   );
 }

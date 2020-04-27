@@ -1,7 +1,9 @@
 import React, { useContext } from 'react';
-import { StyleSheet, KeyboardAvoidingView } from 'react-native';
+import { StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { Card } from 'react-native-elements';
+
+import { Constants, DarkTheme } from '../constants/Theme';
 import { Context as AuthContext } from '../context/AuthContext';
 import AuthForm from '../components/AuthForm';
 import NavLink from '../components/NavLink';
@@ -22,7 +24,7 @@ const LoginScreen = ({ navigation }) => {
         <KeyboardAvoidingView 
             style={styles.container} 
             behavior={Platform.OS == 'ios'? "padding" : "height"}>
-            <Card>
+            <Card containerStyle={Constants.boxShadow}>
                 <AuthForm
                     headerText="Welcome"
                     errorMessage={state.errorMessage}
@@ -42,6 +44,7 @@ const styles = StyleSheet.create({
         flex: 1,
         alignContent: 'center',
         justifyContent: 'center',
+        backgroundColor: DarkTheme.darkBackground
     }
 });
 

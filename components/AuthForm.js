@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Text, Input, Button } from 'react-native-elements';
 import { useFocusEffect } from '@react-navigation/native';
 import { InputIcon } from '../components/Icons';
-import Colors from '../constants/Colors';
+import { Constants } from '../constants/Theme';
 import Spacer from '../components/Spacer';
 
 function AuthForm({ type, headerText, errorMessage, submitButtonText, onSubmit }) {
@@ -69,7 +69,9 @@ function AuthForm({ type, headerText, errorMessage, submitButtonText, onSubmit }
                 placeholder="sample@domain.com"
                 value={email}
                 onChangeText={setEmail}
+                autoCompleteType="email"
                 autoCapitalize="none"
+                keyboardType="email-address"
                 autoCorrect={false}
             />
             <Spacer size={7} />
@@ -86,12 +88,15 @@ function AuthForm({ type, headerText, errorMessage, submitButtonText, onSubmit }
                 onChangeText={setPassword}
                 autoCapitalize="none"
                 autoCorrect={false}
+                clearTextOnFocus={type != 'Signup'}
                 secureTextEntry
             />
             <Spacer size={1} />
-            <Text style={{ color: Colors.errorText }}>{errorMessage}</Text>
+            <Text style={{ color: Constants.errorText }}>{errorMessage}</Text>
             <Spacer size={8} />
             <Button
+                buttonStyle={Constants.buttonDesign}
+                titleStyle={Constants.buttonDesign}
                 title={submitButtonText}
                 onPress={() =>
                     type == 'Signup' ?

@@ -12,11 +12,17 @@ export default function(containerRef) {
           Signup: 'signup',
         },
       },
+      Intro: {
+        path: 'intro',
+        screens: {
+          Intro: 'intro'
+        }
+      },
       Root: {
         path: 'root',
         screens: {
           Home: 'home',
-          Links: 'links',
+          Bills: 'bills',
           Account: 'account',
         },
       },

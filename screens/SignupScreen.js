@@ -3,6 +3,8 @@ import { StyleSheet, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scrollview';
 import { Card } from 'react-native-elements';
+
+import { Constants, DarkTheme } from '../constants/Theme';
 import { Context as AuthContext } from '../context/AuthContext';
 import AuthForm from '../components/AuthForm';
 import NavLink from '../components/NavLink';
@@ -23,7 +25,7 @@ const SignupScreen = ({ navigation }) => {
     return (
         <KeyboardAwareScrollView contentContainerStyle={styles.container}>
             <View style={styles.cardContainer}>
-                <Card>
+                <Card containerStyle={Constants.boxShadow}>
                     <AuthForm
                         type="Signup"
                         headerText="Creat a Free Account"
@@ -46,7 +48,8 @@ const styles = StyleSheet.create({
     cardContainer: {
         flex: 1,
         alignContent: 'center',
-        justifyContent: 'center'
+        justifyContent: 'center',
+        backgroundColor: DarkTheme.darkBackground
     }
 });
 

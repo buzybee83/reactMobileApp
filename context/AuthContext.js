@@ -4,8 +4,8 @@ import clientAPI from '../clientAPI/api';
 import { switchNavigation, resetNavigation } from '../services/navigationServices';
 
 const authReducer = (state, action) => {
-    console.log('ACTION === ', action);
-    console.log('STATE === ', state);
+    console.log('AuthReducer::ACTION === ', action);
+    console.log('AuthReducer::STATE === ', state);
     switch (action.type) {
         case 'RESTORE_TOKEN':
             return { ...state, userToken: action.payload, isAuthenticated: true };
@@ -29,11 +29,11 @@ const clearErrorMessage = dispatch => () => {
 const signup = dispatch => async ({ firstName, lastName, email, password }) => {
     console.log('SIGNUP HAPPENING')
     try {
-        const response = await clientAPI.post('/signup', { firstName, lastName, email, password });
+        const response = await clientAPI.post('api/signup', { firstName, lastName, email, password });
         console.log('SIGNUP RESPONSE === ', response.data)
         await AsyncStorage.setItem('currentUser', JSON.stringify(response.data));
         dispatch({ type: 'LOGIN', payload: response.data.token });
-        switchNavigation('Root');
+        switchNavigation('Intro');
     } catch (err) {
         console.log('SIGNUP ERROR ==== ', err)
         const errorMssg = err.response && err.response.data.errmsg && err.response.data.errmsg.includes('duplicate') ?
@@ -48,13 +48,14 @@ const signup = dispatch => async ({ firstName, lastName, email, password }) => {
 
 const login = dispatch => async ({ email, password }) => {
     try {
-        const response = await clientAPI.post('/login', { email, password });
+        const response = await clientAPI.post('api/login', { email, password });
         await AsyncStorage.setItem('currentUser', JSON.stringify(response.data));
         dispatch({ type: 'LOGIN', payload: response.data.token });
-        switchNavigation('Root');
+        if (response.data.budget) switchNavigation('Home');
+        else switchNavigation('Intro');
     } catch (err) {
         console.log('LOGIN ERROR == ', err);
-        const errorMssg = err.response.data.error? 
+        const errorMssg = err.response && err.response.data.error? 
             err.response.data.error : 
             'Something went wrong while tryign to log you in, please try later.';
         dispatch({
@@ -63,7 +64,6 @@ const login = dispatch => async ({ email, password }) => {
         });
     }
 };
-
 
 const logout = dispatch => async () => {
     try {
