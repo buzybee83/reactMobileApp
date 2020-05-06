@@ -1,18 +1,10 @@
 
 const PayFrequency = {
-  0: 'Misc',
   1: 'Weekly',
   2: 'Bi-Weekly',
-  3: 'Bi-Monthly',
+  3: 'Semi-Monthly',
   4: 'Monthly'
 };
-
-const InitPayFrequency = {
-  1: 'Weekly',
-  2: 'Bi-Weekly',
-  3: 'Bi-Monthly',
-  4: 'Monthly'
-}
 
 const EmploymentType = {
   1: 'Hourly',
@@ -39,8 +31,7 @@ const Income = [{
   field: 'payFrequency',
   label: 'Pay Frequency',
   type: 'select',
-  default: '2',
-  initOptions: InitPayFrequency,
+  default: 2,
   options: PayFrequency
 }, {
   section: 'Set Your Income Type',
@@ -49,6 +40,7 @@ const Income = [{
   field: 'employmentType',
   label: 'Employment Status',
   type: 'select',
+  default: 1,
   options: EmploymentType
 }, {
   section: 'Add Your Net Income',
@@ -70,13 +62,13 @@ const Income = [{
       order: 6,
       parent: 'balanceThresholds',
       contollingElement: 'isEnabled',
-      type: 'combo',
       children: [
         {
           order: 1,
           field: 'thresholdType',
           label: 'Select Mode',
           type: 'select',
+          default: 1,
           options: AmountTypes
         }, {
           order: 2,
@@ -102,14 +94,13 @@ const Savings = [{
       order: 8,
       parent: 'allocation',
       contollingElement: 'isEnabled',
-      type: 'combo',
       children: [
         {
           order: 1,
           field: 'amountType',
           label: 'Set Amount Type',
           type: 'select',
-          default: '$',
+          default: 1,
           options: AmountTypes
         }, {
           order: 2,
@@ -133,7 +124,6 @@ const Savings = [{
 
 export {
   PayFrequency,
-  InitPayFrequency,
   EmploymentType,
   AmountTypes,
   Income,

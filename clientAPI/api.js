@@ -4,7 +4,24 @@ Copy Forwarding address corresponding to HTTP
 Update/paste baseURL below
 */
 import axios from 'axios';
+import { AsyncStorage } from 'react-native';
 
-export default axios.create({
-    baseURL: 'http://744a9252.ngrok.io',
+const instance =  axios.create({
+    baseURL: 'http://755024e6.ngrok.io',
 });
+
+instance.interceptors.request.use(
+    async config => {
+        let currentUser = await AsyncStorage.getItem('currentUser');
+        if (currentUser) {
+            currentUser = JSON.parse(currentUser);
+            config.headers.Authorization = `Bearer ${currentUser.token}`;
+        }
+        return config;
+    },
+    err => {
+        return Promise.reject(err);
+    }
+);
+
+export default instance;

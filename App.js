@@ -8,6 +8,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 
 import { Provider as AuthProvider } from './context/AuthContext';
+import { Provider as BudgetProvider } from './context/BudgetContext';
 import AuthNavigator from './navigation/AuthNavigator';
 import IntroNavigator from './navigation/IntroNavigator';
 import BottomTabNavigator from './navigation/BottomTabNavigator';
@@ -22,14 +23,13 @@ export default function App({ navigation, ...props }) {
 	const containerRef = React.useRef();
 	const { getInitialState } = useLinking(containerRef);
 	const [isAuthenticated, setAuthState] = React.useState(false);
-	const [initialRoute, setInitialRoute] = React.useState('Intro');
-	const [barTheme, setBarTheme] = React.useState('dark-content')
+	const [initialRoute, setInitialRoute] = React.useState('Login');
+	const [barTheme, setBarTheme] = React.useState('light-content')
 	// Load any resources or data that we need prior to rendering the app
 	React.useEffect(() => {
 		async function loadResourcesAndDataAsync() {
 			try {
 				SplashScreen.preventAutoHide();
-
 				// Load our initial navigation state
 				setInitialNavigationState(await getInitialState());
 				// Load fonts
@@ -44,16 +44,18 @@ export default function App({ navigation, ...props }) {
 					'roboto-bold-i': require('./assets/fonts/Roboto-BoldItalic.ttf'),
 					'space-mono': require('./assets/fonts/SpaceMono-Regular.ttf'),
 				});
-				const currentUser = await AsyncStorage.getItem('currentUser');
-				console.log('**APP** LOADING CURRENT USER === ', currentUser)
+				// Check User is logged in
+				// await AsyncStorage.removeItem('currentUser');
+				let currentUser = await AsyncStorage.getItem('currentUser');
 				if (currentUser) {
+					currentUser = JSON.parse(currentUser);
 					setAuthState(true);
-					console.log('budget == ' , currentUser.budget)
+					console.log(':::CURRENT USER ::: ', currentUser)
 					if (currentUser.budget) {
-						setInitialRoute('Home');
-					} else {
+						setInitialRoute('Main');
+						setBarTheme('dark-content');
+					} else { 
 						setInitialRoute('Intro');
-						setBarTheme('light-content');
 					}
 				}
 			} catch (e) {
@@ -73,40 +75,43 @@ export default function App({ navigation, ...props }) {
 		return null;
 	} else {
 		return (
-			<AuthProvider >
-				{Platform.OS === 'ios' && <StatusBar barStyle={barTheme} />}
-				<NavigationContainer
-					ref={containerRef => setTopNavigator(containerRef)}
-					initialState={initialNavigationState}
-				>
-					<Stack.Navigator initialRouteName={initialRoute}>
-						<Stack.Screen
-							name="Auth"
-							component={AuthNavigator}
-							options={{
-								headerLeft: null,
-								headerShown: false,
-								animationTypeForReplace: isAuthenticated ? 'pop' : 'push',
-							}}
-						/>
-						<Stack.Screen
-							name="Intro"
-							component={IntroNavigator}
-							options={{
-								headerLeft: null,
-								headerShown: false,
-							}}
-						/>
-						<Stack.Screen
-							name="Home"
-							component={BottomTabNavigator}
-							options={{
-								headerLeft: null,
-								animationTypeForReplace: 'pop',
-							}}
-						/>
-					</Stack.Navigator>
-				</NavigationContainer>
+			<AuthProvider value={{ isAuthenticated }}>
+				<BudgetProvider>
+					{Platform.OS === 'ios' && <StatusBar barStyle={barTheme} />}
+					<NavigationContainer
+						ref={containerRef => setTopNavigator(containerRef)}
+						initialState={initialNavigationState}
+					>
+						<Stack.Navigator initialRouteName={initialRoute}>
+							<Stack.Screen
+								name="Auth"
+								component={AuthNavigator}
+								options={{
+									headerLeft: null,
+									headerShown: false,
+									animationTypeForReplace: isAuthenticated ? 'pop' : 'push',
+								}}
+							/>
+							<Stack.Screen
+								name="Intro"
+								component={IntroNavigator}
+								options={{
+									headerLeft: null,
+									headerShown: false,
+									animationTypeForReplace: 'push'
+								}}
+							/>
+							<Stack.Screen
+								name="Main"
+								component={BottomTabNavigator}
+								options={{
+									headerLeft: null,
+									animationTypeForReplace: 'push',
+								}}
+							/>
+						</Stack.Navigator>
+					</NavigationContainer>
+				</BudgetProvider>
 			</AuthProvider>
 		);
 	}

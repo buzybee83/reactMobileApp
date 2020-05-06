@@ -18,8 +18,8 @@ export default function(containerRef) {
           Intro: 'intro'
         }
       },
-      Root: {
-        path: 'root',
+      Main: {
+        path: 'main',
         screens: {
           Home: 'home',
           Bills: 'bills',

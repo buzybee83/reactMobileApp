@@ -96,7 +96,7 @@ function AuthForm({ type, headerText, errorMessage, submitButtonText, onSubmit }
             <Spacer size={8} />
             <Button
                 buttonStyle={Constants.buttonDesign}
-                titleStyle={Constants.buttonDesign}
+                titleStyle={Constants.buttonTextLarge}
                 title={submitButtonText}
                 onPress={() =>
                     type == 'Signup' ?

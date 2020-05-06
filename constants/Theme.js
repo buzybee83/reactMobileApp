@@ -35,6 +35,8 @@ const Constants = {
   buttonDesign: {
     borderRadius: 45,
     backgroundColor: primaryColor,
+  },
+  buttonTextLarge: {
     fontSize: 20,
     fontWeight: '500'
   },

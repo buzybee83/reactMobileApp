@@ -1,18 +1,23 @@
-import * as React from 'react';
+import React, { useEffect, useContext } from 'react';
 import { StatusBar, Image, StyleSheet, Text, View, SafeAreaView } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
-import { Context as AuthContext } from '../context/AuthContext';
+import { Context as BudgetContext } from '../context/BudgetContext';
 
-export default function HomeScreen() {
-  const { state, bootstrapAuthAsync } = React.useContext(AuthContext);
+export default function HomeScreen({ navigation }) {
+  const { state, fetchBudget } = useContext(BudgetContext);
+
   StatusBar.setBarStyle('dark-content');
-  
-  React.useLayoutEffect(() => async () => {
-    console.log('LAYOUTEFFECT CALLED :: HOMESCREEN');
-    if (!state.isAuthenticated) await bootstrapAuthAsync();
-  },[]);
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', async () => {
+      await fetchBudget();
+    });
+    
+    return unsubscribe;
+  }, [navigation]);
 
   return (
+   
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
         <View style={styles.welcomeContainer}>
@@ -24,6 +29,7 @@ export default function HomeScreen() {
             }
             style={styles.welcomeImage}
           />
+          <Text> { console.log('BUDGET STATE >>', state) }</Text>
         </View>
 
         <View style={styles.getStartedContainer}>

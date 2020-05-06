@@ -23,8 +23,8 @@ const SignupScreen = ({ navigation }) => {
     );
 
     return (
-        <KeyboardAwareScrollView contentContainerStyle={styles.container}>
-            <View style={styles.cardContainer}>
+        <View style={styles.container}>
+            <KeyboardAwareScrollView contentContainerStyle={styles.cardContainer}>
                 <Card containerStyle={Constants.boxShadow}>
                     <AuthForm
                         type="Signup"
@@ -36,17 +36,18 @@ const SignupScreen = ({ navigation }) => {
                     <Spacer size={34} />
                     <NavLink routeName="Login" text="Already have an account?" />
                 </Card>
-            </View>
-        </KeyboardAwareScrollView>
+            </KeyboardAwareScrollView>
+        </View>
+
     );
 };
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        backgroundColor: DarkTheme.darkBackground
     },
     cardContainer: {
-        flex: 1,
         alignContent: 'center',
         justifyContent: 'center',
         backgroundColor: DarkTheme.darkBackground

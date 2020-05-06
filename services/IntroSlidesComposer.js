@@ -6,7 +6,7 @@ const defaultSlides = [
     id: '1',
     order: 0,
     title: 'Let\'s Get You Started!',
-    text: 'In the next screens, we are going to personalize some settings to get your budget going.',
+    text: 'We will start by creating a budget dased on the information you enter here.',
     image: require('../assets/images/calc.png'),
     color: '#fff',
     bgColor: '#59b2ab'
@@ -18,7 +18,7 @@ const defaultSlides = [
     titleAlt: 'Are You Sure You Want to Start Without Initial Setup?',
     text: 'Don\'t worry, these settings are just to get your budget started. You will be able to make changes later.',
     textAlt: 'Skipping the initial setup, you will have to manually configure all settings or you can revisit this walkthrough at a later time!',
-    action: 'Launch Now!',
+    action: 'Create Budget Now!',
     actionAlt: 'Launch Anyway!',
     image: require('../assets/images/rocket-takeoff.png'),
     imageAlt: require('../assets/images/rocket.png'),
@@ -28,7 +28,7 @@ const defaultSlides = [
   }
 ];
 
-export default function IntroSlidesComposer() {
+export function ConstructSlides() {
   let slides = [defaultSlides[0]];
   let count = 0;
   Income.forEach(ele => {
@@ -40,7 +40,7 @@ export default function IntroSlidesComposer() {
       ...ele
     };
     count++;
-    if (ele.default) tempEl.value = ele.default;
+    if (ele.default !== undefined) tempEl.value = ele.default;
     if (ele.optionalSlides) {
       tempEl.optionalSlides = [];
       ele.optionalSlides.forEach((subEl) => {
@@ -52,7 +52,7 @@ export default function IntroSlidesComposer() {
           ...subEl
         }
         count++;
-        if (subEl.default) subTempEl.value = subEl.default;
+        if (subEl.default !== undefined) subTempEl.value = subEl.default;
         tempEl.optionalSlides.push(subTempEl);
       });
     }
@@ -68,7 +68,7 @@ export default function IntroSlidesComposer() {
       ...ele
     };
     count++;
-    if (ele.default) tempEl.value = ele.default;
+    if (ele.default !== undefined) tempEl.value = ele.default;
     if (ele.optionalSlides) {
       tempEl.optionalSlides = [];
       ele.optionalSlides.forEach((subEl) => {
@@ -80,15 +80,46 @@ export default function IntroSlidesComposer() {
           ...subEl
         }
         count++;
-        if (subEl.default) subTempEl.value = subEl.default;
+        if (subEl.default !== undefined) subTempEl.value = subEl.default;
         tempEl.optionalSlides.push(subTempEl);
       });
     }
     slides[slides.length] = tempEl;
   });
-  
+
   slides = slides.sort((a, b) => a.order > b.order);
   slides[slides.length] = defaultSlides[1];
   console.log('LENGTH ==', slides.length)
   return slides;
+}
+
+export function DeconstructSlides(slides, introStatus) {
+  const settings = {
+    introStatus
+  };
+  
+  slides.forEach((slide) => {
+    if (slide.form) {
+      if (slide.children) {
+        slide.children.forEach((child) => {
+          if (slide.parent) {
+            if (!settings.hasOwnProperty(slide.parent)) settings[slide.parent] = {};
+            settings[slide.parent][child.field] = child.value;
+          } else {
+            settings[child.field] = child.value;
+          }
+        });
+      } else {
+        if (slide.parent) {
+          if (!settings.hasOwnProperty(slide.parent)) settings[slide.parent] = {};
+          settings[slide.parent][slide.field] = slide.value;
+        } else {
+          settings[slide.field] = slide.value;
+        }
+      }
+    }
+  });
+
+  return settings;
+
 }
