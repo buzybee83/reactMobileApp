@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, ViewBase } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scrollview';
 import { Card } from 'react-native-elements';
@@ -9,6 +9,7 @@ import { Context as AuthContext } from '../context/AuthContext';
 import AuthForm from '../components/AuthForm';
 import NavLink from '../components/NavLink';
 import Spacer from '../components/Spacer';
+import WaveShape from '../components/WaveShape';
 
 const SignupScreen = ({ navigation }) => {
     const { state, signup, clearErrorMessage } = useContext(AuthContext);
@@ -24,6 +25,7 @@ const SignupScreen = ({ navigation }) => {
 
     return (
         <View style={styles.container}>
+            
             <KeyboardAwareScrollView contentContainerStyle={styles.cardContainer}>
                 <Card containerStyle={Constants.boxShadow}>
                     <AuthForm
@@ -35,10 +37,13 @@ const SignupScreen = ({ navigation }) => {
                     />
                     <Spacer size={34} />
                     <NavLink routeName="Login" text="Already have an account?" />
+                   
                 </Card>
             </KeyboardAwareScrollView>
+            <WaveShape style={{ position: "absolute" , bottom: 0, zIndex: 1 }} opacity="0.5" path="pathBottom" view="49 -3.6 650 22" fill="#9966ff" />
+            <WaveShape style={{ position: "absolute" , bottom: 0, zIndex: 1 }} opacity="0.6" path="pathBottom" view="50 -3 650 20" fill="#9966ff" />
         </View>
-
+        
     );
 };
 
@@ -48,6 +53,7 @@ const styles = StyleSheet.create({
         backgroundColor: DarkTheme.darkBackground
     },
     cardContainer: {
+        flex: 1,
         alignContent: 'center',
         justifyContent: 'center',
         backgroundColor: DarkTheme.darkBackground
