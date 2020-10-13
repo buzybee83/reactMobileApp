@@ -89,7 +89,7 @@ export default function App({ navigation, ...props }) {
 								options={{
 									headerLeft: null,
 									headerShown: false,
-									animationTypeForReplace: isAuthenticated ? 'push' : 'pop',
+									animationTypeForReplace: isAuthenticated ? 'pop' : 'push',
 								}}
 							/>
 							<Stack.Screen
@@ -98,7 +98,7 @@ export default function App({ navigation, ...props }) {
 								options={{
 									headerLeft: null,
 									headerShown: false,
-									animationTypeForReplace: 'push'
+									animationTypeForReplace: 'pop'
 								}}
 							/>
 							<Stack.Screen
@@ -106,7 +106,7 @@ export default function App({ navigation, ...props }) {
 								component={BottomTabNavigator}
 								options={{
 									headerLeft: null,
-									animationTypeForReplace: 'push',
+									animationTypeForReplace: 'pop	',
 								}}
 							/>
 						</Stack.Navigator>
