@@ -89,7 +89,7 @@ export default function App({ navigation, ...props }) {
 								options={{
 									headerLeft: null,
 									headerShown: false,
-									animationTypeForReplace: isAuthenticated ? 'pop' : 'push',
+									animationTypeForReplace: isAuthenticated ? 'push' : 'pop',
 								}}
 							/>
 							<Stack.Screen

@@ -2,6 +2,7 @@ import React, { useContext } from 'react';
 import { StyleSheet, Text, KeyboardAvoidingView, Platform } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { Card } from 'react-native-elements';
+import { useHeaderHeight } from '@react-navigation/stack';
 
 import { Constants, DarkTheme } from '../constants/Theme';
 import { Context as AuthContext } from '../context/AuthContext';
@@ -12,6 +13,7 @@ import WaveShape from '../components/WaveShape';
 
 const LoginScreen = ({ navigation }) => {
     const { state, login, clearErrorMessage } = useContext(AuthContext);
+    const headerHeight = useHeaderHeight();
 
     useFocusEffect(
         React.useCallback(() => {
@@ -24,6 +26,8 @@ const LoginScreen = ({ navigation }) => {
     return (
         <KeyboardAvoidingView 
             style={styles.container} 
+            contentContainerStyle={{flex: 1}}
+            keyboardVerticalOffset={-headerHeight - 25}
             behavior={Platform.OS == 'ios'? "padding" : "height"}>
             <WaveShape style={{ position: "absolute" , bottom: 0, zIndex: 1 }} opacity="0.55" path="pathTop" view="-1 1 350 750" fill="#9966ff" />
             <Text style={styles.header}> WELCOME </Text>
