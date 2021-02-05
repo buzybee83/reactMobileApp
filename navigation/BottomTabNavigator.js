@@ -3,8 +3,8 @@ import { StatusBar } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
 import { TabBarIcon } from '../components/Icons';
-import HomeScreen from '../screens/HomeScreen';
-import IntroScreen from '../screens/IntroScreen';
+import { BudgetNavigator } from './StackNavigator';
+import ExpensesScreen from '../screens/ExpensesScreen';
 // import BillsScreen from '../screens/BillsScreen';
 import AccountScreen from '../screens/AccountScreen';
 import { Context as AuthContext } from '../context/AuthContext';
@@ -16,22 +16,21 @@ export default function BottomTabNavigator({ navigation, route }) {
   // Set the header title on the parent stack navigator depending on the
   // currently active tab. Learn more in the documentation:
   // https://reactnavigation.org/docs/en/screen-options-resolution.html
-  navigation.setOptions({ headerTitle: getHeaderTitle(route), statusBarStyle: 'light-content' });
+  navigation.setOptions({ statusBarStyle: 'dark-content' });
   const { state } = useContext(AuthContext);
-  console.log('state==', state)
+  // console.log('BottomTabNavigator AUTH state==', state)
   return (
-    <BottomTab.Navigator initialRouteName={INITIAL_ROUTE_NAME}>
+    <BottomTab.Navigator headerMode="none" initialRouteName={INITIAL_ROUTE_NAME}>
       <BottomTab.Screen
-        name="Start"
-        component={IntroScreen}
+        name="Expenses"
+        component={ExpensesScreen}
         options={{
-          title: 'Get Started',
           tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name="md-medkit" />,
         }}
       />
       <BottomTab.Screen
         name="Home"
-        component={HomeScreen}
+        component={BudgetNavigator}
         options={{
           tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name="md-home" />,
         }}
@@ -50,12 +49,11 @@ export default function BottomTabNavigator({ navigation, route }) {
 function getHeaderTitle(route) {
   const routeName = route.state?.routes[route.state.index]?.name ?? INITIAL_ROUTE_NAME;
   const currentMonth = new Date().toLocaleString('default', { month: 'long' });
-
   switch (routeName) {
     case 'Home':
-      return `${currentMonth} Overview`;
-    case 'Bills':
-      return `${currentMonth} Bills`;
+      return null;
+    case 'Expenses':
+      return `${currentMonth} Expenses`;
     case 'Account':
       return 'My Account';
   }

@@ -82,13 +82,12 @@ export default function App({ navigation, ...props }) {
 						ref={containerRef => setTopNavigator(containerRef)}
 						initialState={initialNavigationState}
 					>
-						<Stack.Navigator initialRouteName={initialRoute}>
+						<Stack.Navigator headerMode="none" initialRouteName={initialRoute}>
 							<Stack.Screen
 								name="Auth"
 								component={AuthNavigator}
 								options={{
 									headerLeft: null,
-									headerShown: false,
 									animationTypeForReplace: isAuthenticated ? 'pop' : 'push',
 								}}
 							/>
@@ -97,7 +96,6 @@ export default function App({ navigation, ...props }) {
 								component={IntroNavigator}
 								options={{
 									headerLeft: null,
-									headerShown: false,
 									animationTypeForReplace: 'pop'
 								}}
 							/>
