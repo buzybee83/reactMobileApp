@@ -1,20 +1,25 @@
-const tintColor = '#2f95dc';
+const tintColor = '#8c3cff';
+const whiteColor = '#FFF';
+const darkGrey = '#263238';
 // const primaryColor = '#22BCB5';
-const lightBackground = '#FFF'
-const darkBackground = '#263238';
-const primaryColor = '#22BCB5';
-const secondaryColor = '#e91d50';
-const linksColor = '#1ea6a0';
+const primaryColor = '#6200ee';
+const secondaryColor = '#81DD02';
+const warnColor = '#e91d50';
+// const linksColor = '#1ea6a0';
+const linksColor = primaryColor;
 const mainFontFamily = 'roboto';
-
 
 const Constants = {
   mainFontFamily,
   tintColor,
+  darkGrey,
+  whiteColor,
   iconDefault: '#ccc',
   iconSelected: tintColor,
   primaryColor,
   secondaryColor,
+  warnColor,
+  linksColor,
   errorBackground: 'red',
   errorText: '#bb0000',
   warningBackground: '#EAEB5E',
@@ -46,7 +51,7 @@ const Constants = {
   },
   boxShadow: {
     shadowColor: '#000',
-    shadowOffset: {height: 4, width: 4},
+    shadowOffset: { height: 4, width: 4 },
     shadowOpacity: .25,
     shadowRadius: 3.5,
     elevation: 5,
@@ -54,13 +59,13 @@ const Constants = {
 };
 
 const LightTheme = {
-  lightBackground,
-  tabBar: '#212121',
+  backgroundColor: whiteColor,
+  color: darkGrey,
 };
 
 const DarkTheme = {
-  darkBackground,
-  tabBar: '#fefefe',
+  backgroundColor: darkGrey,
+  color: '#fefefe',
 };
 
 const Colors = [

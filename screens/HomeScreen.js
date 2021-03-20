@@ -1,58 +1,67 @@
 import React, { useEffect, useContext, useState } from 'react';
-import { View, SafeAreaView, Text, StyleSheet, FlatList, Dimensions } from 'react-native';
-import { ListItem, Card } from 'react-native-elements';
+import { RefreshControl, SafeAreaView, Text, StyleSheet, FlatList, Dimensions } from 'react-native';
+import { Card } from 'react-native-elements';
+import { ActivityIndicator } from 'react-native-paper';
 import { ScrollView } from 'react-native-gesture-handler';
 import { Constants, DarkTheme } from '../constants/Theme';
 import { Context as BudgetContext } from '../context/BudgetContext';
 
 const WINDOW_WIDTH = Dimensions.get('window').width;
 const SCREEN_WIDTH = Dimensions.get('screen').width;
+const WINDOW_HEIGHT = Dimensions.get('window').height;
 
 export default function HomeScreen({ navigation }) {
-	const { state, fetchBudget } = useContext(BudgetContext);
+	const { state, fetchBudget, updateBudget } = useContext(BudgetContext);
 	const [isRefreshing, setRefreshing] = useState(false);
+	// useEffect(() => {
+	// 	const unsubscribe = navigation.addListener('focus', async () => {
+	// 		await fetchBudget();
+	// 	});
+	// 	return unsubscribe;
+	// }, [navigation]);
+
 	useEffect(() => {
-		const unsubscribe = navigation.addListener('focus', async () => {
-			await fetchBudget();
-		});
+		const refreshBudgetData = async () => {
+			console.log('# refreshBudgetData #')
+			if (!state.budget) {
+				setRefreshing(true);
+				await fetchBudget();
+				setRefreshing(false);
+			}
+			if (!state.isCurrent) {
+				setRefreshing(true);
+				console.log('# UPDATE refreshBudgetData #')
+				await updateBudget(state.budget);
+				setRefreshing(false);
+			}
+		}
+		refreshBudgetData();
+	}, [isRefreshing]);
 
-		return unsubscribe;
-	}, [navigation]);
-	console.log('ISREFRESHING===', isRefreshing)
-
-	const refreshBudgetData = async () => {
-		setRefreshing(true);
-		console.log('===REFRESHING===')
-		await fetchBudget();
-		setRefreshing(false);
-	};
-	console.log('Budget ==> ', state)
+	console.log('HOMESCREEN Budget STATE ==> ', state)
 
 	return (
 		<SafeAreaView style={styles.container}>
 			<ScrollView>
 				<FlatList
-					style={{ width: (SCREEN_WIDTH + 5) }}
+					style={styles.flatlistContainer}
 					data={state?.budget?.monthlyBudget}
 					keyExtractor={item => item._id}
-					horizontal={true}
+					horizontal
+					legacyImplementation={false}
 					showsVerticalScrollIndicator={false}
-					refreshControl={
-                        <RefreshControl
-                            tintColor={Constants.noticeText}
-                            refreshing={isRefreshing}
-                            onRefresh={refreshBudgetData}
-                        />
-                    }
 					pagingEnabled={true}
-					contentContainerStyle={{ flexGrow: 1, alignSelf: 'center' }}
+					contentContainerStyle={styles.contentContainer}
 					renderItem={({ item }) => {
 						return (
 							<Card
 								title={item.month.name}
-								containerStyle={{ width: (WINDOW_WIDTH - 25) }}
+								containerStyle={styles.cardContent}
 							>
-								<Text>Month Overview</Text>
+								{ isRefreshing ? 
+									<ActivityIndicator animating={true} style={{paddingVertical: 30}}/> :
+									<Text>Month Overview</Text>
+								}
 							</Card>
 						)
 					}}
@@ -64,34 +73,44 @@ export default function HomeScreen({ navigation }) {
 
 const styles = StyleSheet.create({
 	container: {
+		...DarkTheme,
 		flex: 1,
-		backgroundColor: DarkTheme.darkBackground,
 		justifyContent: "center",
 		alignItems: "center"
 	},
+	flatlistContainer: {
+		width: (SCREEN_WIDTH + 5),  
+		height:'100%' 
+	},
 	contentContainer: {
-		paddingTop: 30,
+		flexGrow: 1, 
+		alignSelf: 'center'
 	},
-	welcomeContainer: {
-		alignItems: 'center',
-		marginTop: 10,
-		marginBottom: 20,
-	},
-	welcomeImage: {
-		width: 100,
-		height: 80,
-		resizeMode: 'contain',
-		marginTop: 3,
-		marginLeft: -10,
-	},
-	getStartedContainer: {
-		alignItems: 'center',
-		marginHorizontal: 50,
-	},
-	titleText: {
-		fontSize: 18,
-		color: 'rgba(96,100,109, 1)',
-		lineHeight: 24,
-		textAlign: 'center',
+	cardContent: {
+		width: (WINDOW_WIDTH - 25), 
+		height: (WINDOW_HEIGHT - 200)
 	}
 });
+/* <ScrollView
+				refreshControl={
+					<RefreshControl
+						tintColor={Constants.primaryColor}
+						refreshing={isRefreshing}
+						onRefresh={refreshBudgetData}
+					/>
+				}
+			></ScrollView> */
+/* <FlatList
+	style={styles.flatlistContainer}
+	data={state?.budget?.monthlyBudget}
+	keyExtractor={item => item._id}
+	horizontal
+	legacyImplementation={false}
+	showsVerticalScrollIndicator={false}
+	refreshControl={
+		<RefreshControl
+			tintColor={Constants.noticeText}
+			refreshing={isRefreshing}
+			onRefresh={refreshBudgetData}
+		/>
+	} */

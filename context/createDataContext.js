@@ -1,17 +1,17 @@
 import React, { useReducer, createContext } from 'react';
 
-export default (reducer, actions, defaultValue) => {
+export default (reducer, actions, currentValue) => {
 	const Context = createContext();
 	
 	const Provider = ({ children, value }) => {
 		if (value != undefined) {
 			for (let key in value) {
 				if (value.hasOwnProperty(key)) {
-					defaultValue[key] = value[key];
+					currentValue[key] = value[key];
 				}
 			}
 		}
-		const [state, dispatch] = useReducer(reducer, defaultValue);
+		const [state, dispatch] = useReducer(reducer, currentValue);
 
 		const boundActions = {};
 		for (let key in actions) {

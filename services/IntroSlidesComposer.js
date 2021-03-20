@@ -89,7 +89,7 @@ export function ConstructSlides() {
 
   slides = slides.sort((a, b) => a.order > b.order);
   slides[slides.length] = defaultSlides[1];
-  console.log('LENGTH ==', slides.length)
+  // console.log('LENGTH ==', slides.length)
   return slides;
 }
 

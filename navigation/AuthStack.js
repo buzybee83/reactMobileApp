@@ -4,32 +4,33 @@ import { createStackNavigator } from '@react-navigation/stack';
 import LoginScreen from '../screens/LoginScreen';
 import SignupScreen from '../screens/SignupScreen';
 
-const AuthStack = createStackNavigator();
+// const Auth = createStackNavigator();
 const INITIAL_ROUTE_NAME = 'Login';
+const Stack = createStackNavigator()
 
-export default function AuthNavigator({ navigation, route }) {
+export default function AuthStack({ navigation, route }) {
 	StatusBar.setBarStyle('light-content');
 
 	return (
-		<AuthStack.Navigator
+		<Stack.Navigator
 			headerMode="none"
 			initialRouteName={INITIAL_ROUTE_NAME}>
-			<AuthStack.Screen
+			<Stack.Screen
 				name="Login"
 				options={{
 					headerLeft: null
 				}}
 				component={LoginScreen}
 			/>
-			<AuthStack.Screen
+			<Stack.Screen
 				name="Signup"
 				component={SignupScreen}
 			/>
-		</AuthStack.Navigator>
+		</Stack.Navigator>
 	);
 }
 
-AuthNavigator.navigationOptions = {
+Stack.navigationOptions = {
 	header: null,
 }
 

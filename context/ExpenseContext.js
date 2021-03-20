@@ -9,6 +9,8 @@ const expenseReducer = (prevState, action) => {
 	switch (action.type) {
 		case 'FETCH_EXPENSES':
 			return { ...prevState, expenses: action.payload };
+		case 'FETCH_EXPENSE':
+			return { ...prevState, expense: action.payload };
 		case 'HAS_ERROR':
 			return { ...prevState, errorMessage: action.payload };
 		case 'CLEAR_ERROR':
@@ -18,22 +20,14 @@ const expenseReducer = (prevState, action) => {
 	}
 };
 
-const createExpense = dispatch => async (settings) => {
-	let currentUser = await AsyncStorage.getItem('currentUser');
-	currentUser = JSON.parse(currentUser);
-	const budget = {
-		settings
-	};
+const createExpense = dispatch => async (data) => {
 	try {
-		const response = await API.post('api/budget', budget);
-		currentUser.budget = response.data._id
-		await AsyncStorage.setItem('currentUser', JSON.stringify(currentUser));
-		switchNavigation('Main');
+		await API.post(`/api/${data.budgetId}/expense`, data);
 	} catch (err) {
-		console.log('CREATION ERROR ==== \n', err)
+		console.error('CREATION ERROR ==== \n', err)
 		const errorMssg = err.response && err.response.data.errmsg && err.response.data.errmsg.includes('duplicate') ?
-			'A budget has already been associated with this account.' :
-			'Something went wrong while trying to create your account.';
+			'An expense with the same name already existst. Try changing the name.' :
+			'Something went wrong while trying to add the expense.';
 		dispatch({
 			type: 'HAS_ERROR',
 			payload: errorMssg
@@ -46,15 +40,19 @@ const updateExpense = dispatch => () => {
 };
 
 const fetchExpenses = dispatch => async () => {
-	const response = await API.get('api/budget');
-	console.log('BUDGET FETCHED === ', response.data)
-	dispatch({ type: 'FETCH_BUDGET', payload: response.data });
+	const currentUser = await AsyncStorage.getItem('currentUser');
+	const { budgetId } = JSON.parse(currentUser);
+	
+	const response = await API.get(`/api/${budgetId}/expenses`);
+	dispatch({ type: 'FETCH_EXPENSES', payload: response.data });
 };
 
-const fetchExpenseById = dispatch => async () => {
-	const response = await API.get('api/budget');
-	console.log('BUDGET FETCHED === ', response.data)
-	dispatch({ type: 'FETCH_BUDGET', payload: response.data });
+const fetchExpenseById = dispatch => async (id) => {
+	const currentUser = await AsyncStorage.getItem('currentUser');
+	const { budgetId } = JSON.parse(currentUser);
+
+	const response = await API.get(`api/${budgetId}/expense/${id}`);
+	dispatch({ type: 'FETCH_EXPENSE ', payload: response.data });
 };
 
 const clearError = dispatch => () => {
@@ -64,5 +62,5 @@ const clearError = dispatch => () => {
 export const { Provider, Context } = createDataContext(
 	expenseReducer,
 	{ createExpense, updateExpense, fetchExpenses, fetchExpenseById, clearError },
-	{ expenses: [] }
+	{ expenses: [], expense: {}, errorMessage: '' }
 )

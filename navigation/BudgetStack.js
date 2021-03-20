@@ -3,19 +3,19 @@ import { createStackNavigator } from '@react-navigation/stack';
 import HomeScreen from '../screens/HomeScreen';
 import MonthDetailScreen from '../screens/MonthDetailScreen';
 
-const BudgetStack = createStackNavigator();
+const Stack = createStackNavigator();
 
-function BudgetNavigator({ navigation, route }) {
+function BudgetStack({ navigation, route }) {
     return (
-        <BudgetStack.Navigator>
-            <BudgetStack.Screen
+        <Stack.Navigator>
+            <Stack.Screen
                 name="Budget"
                 component={HomeScreen}
                 options={{
                     headerTitle: getHeaderTitle(route)
                 }}
             />
-            <BudgetStack.Screen
+            <Stack.Screen
                 name="MonthDetails"
                 component={MonthDetailScreen}
                 options={{
@@ -23,7 +23,7 @@ function BudgetNavigator({ navigation, route }) {
                     headerTitle: getHeaderTitle(route)
                 }}
             />
-        </BudgetStack.Navigator>
+        </Stack.Navigator>
     );
 }
 
@@ -38,4 +38,4 @@ function getHeaderTitle(route) {
     }
 }
 
-export { BudgetNavigator }
+export { BudgetStack }

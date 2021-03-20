@@ -6,15 +6,16 @@ const PayFrequency = {
   4: 'Monthly'
 };
 
-const EmploymentType = {
-  1: 'Hourly',
-  2: 'Salary',
-  3: 'Commission'
-};
+// const EmploymentType = {
+//   1: 'Hourly',
+//   2: 'Salary',
+//   3: 'Commission',
+//   4: 'Hourly + Commnission'
+// };
 
 const AmountTypes = {
-  1: 'Amount',
-  2: 'Percentage',
+  '$': 'Amount',
+  '%': 'Percentage'
 };
 
 const Income = [{
@@ -34,15 +35,15 @@ const Income = [{
   default: 2,
   options: PayFrequency
 }, {
-  section: 'Set Your Income Type',
-  order: 3,
-  parent: 'incomeType',
-  field: 'employmentType',
-  label: 'Employment Status',
-  type: 'select',
-  default: 1,
-  options: EmploymentType
-}, {
+//   section: 'Set Your Income Type',
+//   order: 3,
+//   parent: 'incomeType',
+//   field: 'employmentType',
+//   label: 'Employment Status',
+//   type: 'select',
+//   default: 1,
+//   options: EmploymentType
+// }, {
   section: 'Add Your Net Income',
   order: 4,
   parent: 'incomeType',
@@ -68,7 +69,7 @@ const Income = [{
           field: 'thresholdType',
           label: 'Select Mode',
           type: 'select',
-          default: 1,
+          default: '$',
           options: AmountTypes
         }, {
           order: 2,
@@ -83,7 +84,7 @@ const Income = [{
 }];
 
 const Savings = [{
-  section: 'Setup Budget Savings',
+  section: 'Setup Automatic Savings',
   order: 7,
   field: 'isEnabled',
   label: 'Enable Savings',
@@ -100,7 +101,7 @@ const Savings = [{
           field: 'amountType',
           label: 'Set Amount Type',
           type: 'select',
-          default: 1,
+          default: '%',
           options: AmountTypes
         }, {
           order: 2,
@@ -124,7 +125,7 @@ const Savings = [{
 
 export {
   PayFrequency,
-  EmploymentType,
+  // EmploymentType,
   AmountTypes,
   Income,
   Savings

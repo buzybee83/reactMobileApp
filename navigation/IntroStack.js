@@ -2,25 +2,25 @@ import * as React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import IntroScreen from '../screens/IntroScreen';
 
-const IntroStack = createStackNavigator();
+const Stack = createStackNavigator();
 
-export default function IntroNavigator({ navigation, route }) {
+export default function IntroStack({ navigation, route }) {
   return (
-    <IntroStack.Navigator 
+    <Stack.Navigator 
         headerMode="none"
         initialRouteName="Intro">
-      <IntroStack.Screen
+      <Stack.Screen
         name="Intro"
         options={{
             headerLeft: null
         }}
         component={IntroScreen}
       />
-    </IntroStack.Navigator>
+    </Stack.Navigator>
   );
 }
 
-IntroStack.navigationOptions = {
+Stack.navigationOptions = {
   header: null,
 }
 

@@ -5,8 +5,7 @@ import {
 	Image,
 	StatusBar,
 	Keyboard,
-	KeyboardAvoidingView,
-	Platform
+	KeyboardAvoidingView
 } from 'react-native';
 import update from 'react-addons-update';
 import { Text, Button } from 'react-native-elements';
@@ -22,72 +21,74 @@ import InitialFlowForm from '../components/InitialFlowForm';
 StatusBar.setBarStyle('light-content');
 
 export default class IntroScreen extends React.Component {
-	constructor(props) {
-		super(props);
-		this.state = {
-			introSkipped: false,
-			currentSlide: 0,
-			slides: ConstructSlides()
+	state = {
+		introSkipped: false,
+		currentSlide: 0,
+		isLoading: false,
+		slides: ConstructSlides()
+	}
+
+	componentDidMount = () => {
+		if (this.context.errorMessage) {
+			this.context.clearError();
+		}
+	}
+
+	formStateHandler = (newValue, childIndex) => {
+		// Update parent or child within parent Slide
+		if (childIndex !== undefined) {
+			this.setState({
+				slides: update(this.state.slides, { [this.state.currentSlide]: { children: { [childIndex]: { value: { $set: newValue } } } } })
+			});
+		} else {
+			this.setState({
+				slides: update(this.state.slides, { [this.state.currentSlide]: { value: { $set: newValue } } })
+			});
 		}
 
-		this.formStateHandler = (newValue, childIndex) => {
-			// Update parent or child within parent Slide
-			if (childIndex !== undefined) {
-				this.setState({
-					slides: update(this.state.slides, { [this.state.currentSlide]: { children: { [childIndex]: { value: { $set: newValue } } } } })
+		// Check for Optional Slides & add in place if parent field was enabled
+		if (this.state.slides[this.state.currentSlide].optionalSlides) {
+			let indexRef = this.state.currentSlide + 1;
+			// TODO: Take this out and add Method to Slides Composer
+			if (newValue === true) {
+				console.log('ADDING SLIDES')
+				this.state.slides[this.state.currentSlide].optionalSlides.forEach((subSlide) => {
+					if (subSlide.children !== undefined) {
+						subSlide.children.forEach((child) => {
+							if (child.default) child.value = child.default;
+						});
+					}
+					if (subSlide.default !== undefined) subSlide.value = subSlide.default;
+					this.state.slides.splice(indexRef, 0, subSlide)
+					indexRef++;
 				});
 			} else {
-				this.setState({
-					slides: update(this.state.slides, { [this.state.currentSlide]: { value: { $set: newValue } } })
-				});
+				console.log('SUBTRACTING SLIDES');
+				this.state.slides.splice(indexRef, this.state.slides[this.state.currentSlide].optionalSlides.length);
 			}
 
-			// Check for Optional Slides & add in place if parent field was enabled
-			if (this.state.slides[this.state.currentSlide].optionalSlides) {
-				let indexRef = this.state.currentSlide + 1;
-				// TODO: Take this out and add Method to Slides Composer
-				if (newValue === true) {
-					console.log('ADDING SLIDES')
-					this.state.slides[this.state.currentSlide].optionalSlides.forEach((subSlide) => {
-						if (subSlide.children !== undefined) {
-							subSlide.children.forEach((child) => {
-								if (child.default) child.value = child.default;
-							});
-						} 
-						if (subSlide.default !== undefined) subSlide.value = subSlide.default;
-						this.state.slides.splice(indexRef, 0, subSlide)
-						indexRef++;
-					});
-				} else {
-					console.log('SUBTRACTING SLIDES');
-					this.state.slides.splice(indexRef, this.state.slides[this.state.currentSlide].optionalSlides.length);
-				}
+			this.setState({
+				slides: this.state.slides
+			});
+		}
+	};
 
-				this.setState({
-					slides: this.state.slides
-				});
-			}
-		};
-
-		this.createBudget = (budgetValues) => {
-			console.log('We have launch!!')
-		};
-
-		this.renderItem = ({ item, index }) => {
-			switch (this.state.introSkipped) {
-				/* SKIPPED FLOW */
-				case true:
-					return (
-						<View style={[
-							styles.slide,
-							{
-								backgroundColor: item.bgColorAlt,
-							}
-						]}>
-							<Text style={styles.title}>{item.titleAlt}</Text>
-							<Image source={item.imageAlt} />
-							{
-								item.action ?
+	renderItem = ({ item, index }) => {
+		switch (this.state.introSkipped) {
+			/* SKIPPED FLOW */
+			case true:
+				return (
+					<View style={[
+						styles.slide,
+						{
+							backgroundColor: item.bgColorAlt,
+						}
+					]}>
+						<Text style={styles.title}>{item.titleAlt}</Text>
+						<Image source={item.imageAlt} />
+						{
+							item.action ?
+								<>
 									<Button
 										raised
 										containerStyle={styles.actionButtonContainer}
@@ -100,41 +101,50 @@ export default class IntroScreen extends React.Component {
 											color="rgba(255, 255, 255, .9)"
 											size={24}
 										/>}
-									/> :
-									null
-							}
-							<Text style={[styles.text, {
-								color: item.color,
-							}]}>
-								{item.textAlt}
-							</Text>
-						</View>
-					)
-				case false:
-					/* REGULAR FLOW */
-					return (
-						<View
-							style={[
-								styles.slide,
-								{
-									backgroundColor: item.bgColor,
-								}
-							]}
-						>
-							<Text style={styles.title}>{item.title}</Text>
-							<Image
-								style={{ width: Layout.window.width, maxHeight: 400 }}
-								resizeMode="contain"
-								source={item.image}
-							/>
+									/>
+									{this.context.state.errorMessage? 
+										<Text style={styles.errorContainer}>{this.context.state.errorMessage}</Text> :
+										null
+									}
+									
+								</> :
+								null
+						}
+						<Text style={[styles.text, {
+							color: item.color,
+						}]}>
+							{item.textAlt}
+						</Text>
+					</View>
+				)
+			case false:
+				/* REGULAR FLOW */
+				return (
+					<View
+						style={[
+							styles.slide,
 							{
-								item.form ?
-									<View style={styles.formContainer} >
-										<InitialFlowForm ref="FlowForm" action={this.formStateHandler} slideIndex={index} data={item} />
-									</View> : null
+								backgroundColor: item.bgColor,
 							}
-							{
-								item.action ?
+						]}
+					>
+						<Text style={styles.title}>{item.title}</Text>
+						<Image
+							style={{ width: Layout.window.width, maxHeight: 400 }}
+							resizeMode="contain"
+							source={item.image}
+						/>
+						{
+							item.form ?
+								<View style={styles.formContainer} >
+									{/* <InitialFlowForm ref="FlowForm" action={this.formStateHandler} slideIndex={index} data={item} /> */}
+									<InitialFlowForm action={this.formStateHandler} slideIndex={index} data={item} />
+									
+								</View> : null
+						}
+						{
+							item.action ?
+								<>
 									<Button
 										raised
 										containerStyle={styles.actionButtonContainer}
@@ -147,59 +157,64 @@ export default class IntroScreen extends React.Component {
 											color="rgba(255, 255, 255, .9)"
 											size={24}
 										/>}
-									/> :
-									null
-							}
-							<Text style={[styles.text, {
-								color: item.color,
-							}]}>
-								{item.text}
-							</Text>
-						</View>
-					)
-			}
-		};
+									/>
+									{this.context.state.errorMessage? 
+										<Text style={styles.errorContainer}>{this.context.state.errorMessage}</Text> :
+										null
+									}
+								</> :
+								null
+						}
+						<Text style={[styles.text, {
+							color: item.color,
+						}]}>
+							{item.text}
+						</Text>
+					</View>
+				)
+		}
+	};
 
-		this.renderNextButton = () => {
-			return (
-				<View style={styles.buttonCircle}>
-					<Ionicons
-						name="md-arrow-round-forward"
-						color="rgba(255, 255, 255, .9)"
-						size={24}
-					/>
-				</View>
-			);
-		};
+	renderNextButton = () => {
+		return (
+			<View style={styles.buttonCircle}>
+				<Ionicons
+					name="md-arrow-forward-outline"
+					color="rgba(255, 255, 255, .9)"
+					size={24}
+				/>
+			</View>
+		);
+	};
 
-		this.renderDoneButton = () => {
-			return (
-				<>
-				</>
-			);
-		};
+	renderDoneButton = () => {
+		return (
+			<>
+			</>
+		);
+	};
 
-		this.checkSlideChange = (activeSlide) => {
-			Keyboard.dismiss();
-			if (this.state.introSkipped && this.state.currentSlide > activeSlide) {
-				this.setState({ introSkipped: false });
-			}
+	checkSlideChange = (activeSlide) => {
+		Keyboard.dismiss();
+		if (this.state.introSkipped && this.state.currentSlide > activeSlide) {
+			this.setState({ introSkipped: false });
+		}
 
-			this.setState({ currentSlide: activeSlide });
-		};
+		this.setState({ currentSlide: activeSlide });
+	};
 
-		this.onSkip = () => {
-			this.setState({ introSkipped: true });
-			this.AppIntroSlider.goToSlide(this.state.slides.length - 1, true);
-		};
+	onSkip = () => {
+		this.setState({ introSkipped: true });
+		this.AppIntroSlider.goToSlide(this.state.slides.length - 1, true);
+	};
 
-		this.onDone = () => {
-			let introStatus = 'COMPLETE';
-			if (this.state.introSkipped) introStatus = 'SKIPPED';
-			this.context.createBudget(DeconstructSlides(this.state.slides, introStatus));
-		};
-	}
-	
+	onDone = () => {
+		if (this.context.errorMessage) {
+			this.context.clearError();
+		}
+		const introStatus = this.state.introSkipped ? 'SKIPPED' : 'COMPLETE';
+		this.context.createBudget(DeconstructSlides(this.state.slides, introStatus));
+	};
 	static contextType = BudgetContext;
 
 	render() {
@@ -267,6 +282,11 @@ const styles = StyleSheet.create({
 		borderRadius: 20,
 		justifyContent: 'center',
 		alignItems: 'center',
+	},
+	errorContainer: {
+		padding: 10, 
+		backgroundColor: Constants.whiteColor,
+		color: Constants.errorText 
 	}
 });
 

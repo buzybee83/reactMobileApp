@@ -4,13 +4,13 @@ import API from '../clientAPI/api';
 import { switchNavigation, resetNavigation } from '../services/navigationServices';
 
 const authReducer = (state, action) => {
-	// console.log('AuthReducer::ACTION === ', action);
+	console.log('AuthReducer::ACTION === ', action);
 	// console.log('AuthReducer::STATE === ', state);
 	switch (action.type) {
 		case 'RESTORE_TOKEN':
-			return { ...state, userToken: action.payload, isAuthenticated: true };
+			return { ...state, userToken: action.payload.token, homeScreen: action.payload.homeScreen, isAuthenticated: true };
 		case 'LOGIN':
-			return { errorMessage: '', userToken: action.payload, isAuthenticated: true };
+			return { errorMessage: '', userToken: action.payload, homeScreen: action.payload.homeScreen, isAuthenticated: true };
 		case 'LOGOUT':
 			return { errorMessage: '', userToken: null, isAuthenticated: false };
 		case 'HAS_ERROR':
@@ -48,9 +48,13 @@ const login = dispatch => async ({ email, password }) => {
 	try {
 		const response = await API.post('api/login', { email, password });
 		await AsyncStorage.setItem('currentUser', JSON.stringify(response.data));
-		dispatch({ type: 'LOGIN', payload: response.data.token });
-		if (response.data.budget) switchNavigation('Main');
-		else switchNavigation('Intro');
+		console.log('LOGIN DATA==> ',response.data)
+		if (response.data.budgetId) {
+			dispatch({ type: 'LOGIN', payload: {token: response.data.token, homeScreen: 'Home' }});
+		} else {
+			dispatch({ type: 'LOGIN', payload: {token: response.data.token, homeScreen: 'Intro' }});
+		}
+		// else switchNavigation('Intro');
 	} catch (err) {
 		console.log('LOGIN ERROR == ', err);
 		const errorMssg = err.response && err.response.data.error ?
@@ -78,15 +82,16 @@ const logout = dispatch => async () => {
 const bootstrapAuthAsync = dispatch => async () => {
 	try {
 		let currentUser = await AsyncStorage.getItem('currentUser');
-		if (currentUser) {
-			currentUser = JSON.parse(currentUser);
-			dispatch({ type: 'RESTORE_TOKEN', payload: currentUser.token });
+		currentUser = JSON.parse(currentUser);
+		console.log(currentUser)
+		if (currentUser.budgetId) {
+			dispatch({ type: 'RESTORE_TOKEN', payload: {token: currentUser.token, homeScreen: 'Home'} });
 		} else {
-			// No token found!
-			resetNavigation();
+			dispatch({ type: 'RESTORE_TOKEN', payload: {token: currentUser.token, homeScreen: 'Intro'} });
 		}
+			
 	} catch (err) {
-		// Error occurred - send user back to login screen!
+		// No token found!
 		resetNavigation();
 	}
 }
@@ -94,5 +99,5 @@ const bootstrapAuthAsync = dispatch => async () => {
 export const { Provider, Context } = createDataContext(
 	authReducer,
 	{ signup, login, logout, clearErrorMessage, bootstrapAuthAsync },
-	{ isAuthenticated: false, errorMessage: '' }
+	{ isAuthenticated: false, homeScreen: '', errorMessage: '' }
 );

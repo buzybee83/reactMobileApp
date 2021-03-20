@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useEffect, useContext } from 'react';
 import { StyleSheet, Text, KeyboardAvoidingView, Platform } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { Card } from 'react-native-elements';
@@ -22,6 +22,12 @@ const LoginScreen = ({ navigation }) => {
             };
         }, [])
     );
+    useEffect(() => {
+        if (state.homeScreen) {
+            navigation.navigate({name: state.homeScreen});
+        }
+        
+    }, [state.homeScreen]);
 
     return (
         <KeyboardAvoidingView 

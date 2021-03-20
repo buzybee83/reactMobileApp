@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
+import { useForm } from "react-hook-form";
+
 import { Text, Input, Button } from 'react-native-elements';
 import { useFocusEffect } from '@react-navigation/native';
 import { InputIcon } from '../components/Icons';
 import { Constants } from '../constants/Theme';
 import Spacer from '../components/Spacer';
 
-function AuthForm({ type, headerText, errorMessage, submitButtonText, onSubmit }) {
+const IncomeForm = ({ onSubmitForm }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [firstName, setFirstName] = useState('');
@@ -95,19 +97,24 @@ function AuthForm({ type, headerText, errorMessage, submitButtonText, onSubmit }
             <Text style={{ color: Constants.errorText }}>{errorMessage}</Text>
             <Spacer size={8} />
             <Button
-                buttonStyle={Constants.buttonDesign}
-                titleStyle={Constants.buttonTextLarge}
-                title={submitButtonText}
-                onPress={() =>
-                    type == 'Signup' ?
-                        onSubmit({ firstName, lastName, email, password }) :
-                        onSubmit({ email, password })}
+                raised
+                loading={isLoading}
+                onPress={() => callback(!isVisible)}
+                title="Save"
+                icon={
+                    <ButtonIcon  
+                        name="md-add" 
+                        position="left"
+                        size={24} 
+                        color={Constants.whiteColor} 
+                    />
+                }
             />
         </>
     );
 }
 
-export default AuthForm;
+export default IncomeForm;
 
 
 
