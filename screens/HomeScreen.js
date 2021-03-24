@@ -22,7 +22,7 @@ export default function HomeScreen({ navigation }) {
 
 	useEffect(() => {
 		const refreshBudgetData = async () => {
-			console.log('# refreshBudgetData #')
+			// console.log('# refreshBudgetData #')
 			if (!state.budget) {
 				setRefreshing(true);
 				await fetchBudget();
@@ -30,7 +30,7 @@ export default function HomeScreen({ navigation }) {
 			}
 			if (!state.isCurrent) {
 				setRefreshing(true);
-				console.log('# UPDATE refreshBudgetData #')
+				// console.log('# UPDATE refreshBudgetData #')
 				await updateBudget(state.budget);
 				setRefreshing(false);
 			}
@@ -38,7 +38,7 @@ export default function HomeScreen({ navigation }) {
 		refreshBudgetData();
 	}, [isRefreshing]);
 
-	console.log('HOMESCREEN Budget STATE ==> ', state)
+	// console.log('HOMESCREEN Budget STATE ==> ', state)
 
 	return (
 		<SafeAreaView style={styles.container}>

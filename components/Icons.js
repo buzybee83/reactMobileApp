@@ -37,6 +37,17 @@ const ButtonIcon = (props) => {
 	);
 }
 
+const ListIcon = (props) => {
+	return (
+		<Ionicons
+			name={props.name}
+			size={props.size}
+			style={props.style}
+			color={props.focused ? Constants.iconSelected : Constants.iconDefault}
+		/>
+	);
+}
+
 const styles = StyleSheet.create({
 	leftIcon: {
 		marginLeft: -11,

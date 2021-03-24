@@ -4,7 +4,7 @@ import API from '../clientAPI/api';
 import { switchNavigation, resetNavigation } from '../services/navigationServices';
 
 const authReducer = (state, action) => {
-	console.log('AuthReducer::ACTION === ', action);
+	// console.log('AuthReducer::ACTION === ', action);
 	// console.log('AuthReducer::STATE === ', state);
 	switch (action.type) {
 		case 'RESTORE_TOKEN':
@@ -48,7 +48,6 @@ const login = dispatch => async ({ email, password }) => {
 	try {
 		const response = await API.post('api/login', { email, password });
 		await AsyncStorage.setItem('currentUser', JSON.stringify(response.data));
-		console.log('LOGIN DATA==> ',response.data)
 		if (response.data.budgetId) {
 			dispatch({ type: 'LOGIN', payload: {token: response.data.token, homeScreen: 'Home' }});
 		} else {
@@ -83,7 +82,6 @@ const bootstrapAuthAsync = dispatch => async () => {
 	try {
 		let currentUser = await AsyncStorage.getItem('currentUser');
 		currentUser = JSON.parse(currentUser);
-		console.log(currentUser)
 		if (currentUser.budgetId) {
 			dispatch({ type: 'RESTORE_TOKEN', payload: {token: currentUser.token, homeScreen: 'Home'} });
 		} else {

@@ -2,7 +2,7 @@ import { AsyncStorage } from 'react-native';
 import createDataContext from './createDataContext';
 import API from '../clientAPI/api';
 import { switchNavigation } from '../services/navigationServices';
-import { checkActiveMonths } from '../services/budgetHelper';
+import { checkActiveMonths } from '../services/utilHelper';
 
 const budgetReducer = (prevState, action) => {
 	// console.log('BUDGETReducer::ACTION === ', action);

@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, Picker, TouchableWithoutFeedback, Keyboard, TouchableOpacity } from 'react-native';
 import { useForm, Controller } from "react-hook-form";
-import { Text, Button } from 'react-native-elements';
-import { TextInput, Switch } from 'react-native-paper';
-import { InputIcon } from '../components/Icons';
+import { Text } from 'react-native-elements';
+import { TextInput, Switch, Button } from 'react-native-paper';
 import { Constants } from '../constants/Theme';
 import Spacer from '../components/Spacer';
 
@@ -17,9 +16,19 @@ const constructDaysInMonth = () => {
     return days;
 }
 
-const ExpenseForm = ({ onSubmitForm, expense}) => {
-    const { control, handleSubmit, errors } = useForm();
+const ExpenseForm = ({ onSubmitForm, onDelete, expense, cancelForm }) => {
+    const { control, handleSubmit, formState, errors, reset  } = useForm({
+        mode: 'onChange',
+    });
+    const [canShowRecurringType, setCanShowRecurringType] = useState((expense._id ? expense.frequency.isRecurring : true));
     const daysInMonth = constructDaysInMonth();
+    const [expenseRef, setExpenseRef] = expense._id ? useState(expense) : useState({});
+    const { isDirty, isSubmitted, isTouched } = formState;
+    const onSubmit = (data) => {
+        if (isDirty) {
+            onSubmitForm(data, expenseRef);
+        } 
+    };
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
@@ -27,37 +36,36 @@ const ExpenseForm = ({ onSubmitForm, expense}) => {
                 <Spacer size={1} />
                 <Controller
                     control={control}
-                    render={({ onChange, onBlur, value }) => (
+                    render={({ onChange, value, ref }) => (
                         <TextInput
-                            label="Name of Expense"
+                            label="Description"
                             mode="outlined"
-                            onBlur={() => onBlur(Keyboard.dismiss())}
+                            inputRef={ref}
                             onChangeText={value => onChange(value)}
                             value={value}
                         />
                     )}
                     name="name"
                     rules={{ required: true }}
-                    defaultValue={expense ? expense.name : ""}
+                    defaultValue={expenseRef._id ? expenseRef.name : ""}
                 />
                 {errors.name && <Text style={styles.hasError}>This is required.</Text>}
                 {!errors.name && <Spacer size={1} />}
                 <Controller
                     control={control}
-                    render={({ onChange, onBlur, value, ref }) => (
+                    render={({ onChange, value, ref }) => (
                         <TextInput
                             label="Amount"
                             mode="outlined"
                             keyboardType="numeric"
-                            onBlur={onBlur}
                             inputRef={ref}
-                            onChangeText={value => onChange(value)}
-                            value={value}
+                            onChangeText={value => onChange(value ? parseInt(value) : "")}
+                            value={value ? value.toString() : ""}
                         />
                     )}
                     rules={{ required: true }}
                     name="amount"
-                    defaultValue={expense ? expense.amount : ""}
+                    defaultValue={expenseRef.amount? expenseRef.amount.toString() : ""}
                 />
                 {errors.amount && errors.amount.type == 'required' && <Text style={styles.hasError}>This is required.</Text>}
                 <View style={styles.fieldContainer}>
@@ -66,15 +74,14 @@ const ExpenseForm = ({ onSubmitForm, expense}) => {
                     </View>
                     <Controller
                         control={control}
-                        render={({ onChange, onBlur, value, ref }) => (
+                        render={({ onChange, value, ref }) => (
                             <Picker
                                 value={value}
                                 type="outlined"
-                                onBlur={onBlur}
                                 itemStyle={styles.pickerItem}
                                 style={styles.pickerContainer}
                                 selectedValue={value.toString()}
-                                onValueChange={value => onChange(parseInt(value))}
+                                onValueChange={value => onChange(value ? parseInt(value) : "")}
                                 value={value}
                             >
                                 <Picker.Item label="Select day..." value="" />
@@ -85,7 +92,7 @@ const ExpenseForm = ({ onSubmitForm, expense}) => {
                         )}
                         rules={{ required: true }}
                         name="dueDay"
-                        defaultValue={expense ? expense.dueDay : ""}
+                        defaultValue={expenseRef._id ? expenseRef.dueDay : ""}
                     />
                 </View>
                 {errors.dueDay && <Text style={styles.hasError}>This is required.</Text>}
@@ -93,56 +100,74 @@ const ExpenseForm = ({ onSubmitForm, expense}) => {
                     <Text style={styles.formLabel}> Recurring Expense </Text>
                     <Controller
                         control={control}
-                        render={({ onChange, onBlur, value }) => (
+                        render={({ onChange, value }) => (
                             <Switch
                                 style={{ marginRight: '40%' }}
                                 value={value}
                                 color={Constants.tintColor}
                                 mode="outlined"
-                                onBlur={onBlur}
-                                onValueChange={value => onChange(value)}
+                                onValueChange={value => {
+                                    setCanShowRecurringType(value)
+                                    onChange(value)
+                                }}
                             />
                         )}
                         name="isRecurring"
-                        defaultValue={expense ? expense.frequency.isRecurring : true }
+                        defaultValue={expenseRef._id ? expenseRef.frequency.isRecurring : true }
                     />
                 </View>
                 <Spacer size={1} />
-                <View style={styles.fieldContainer}>
-                    <View style={{width: '40%', flexDirection: 'row'}}>
-                        <Text style={[styles.formLabel, {marginTop: 32}]}> Select Frequency </Text>
-                    </View>
-                    <Controller
-                        control={control}
-                        render={({ onChange, onBlur, value }) => (
-                            <Picker
-                                value={value}
-                                type="outlined"
-                                onBlur={onBlur}
-                                style={styles.pickerContainer}
-                                itemStyle={styles.pickerItem}
-                                selectedValue={value.toString()}
-                                onValueChange={value => onChange(value)}
-                                value={value}
-                            >
-                                <Picker.Item label="Weekly" value="1" />
-                                <Picker.Item label="Twice a Month" value="2" />
-                                <Picker.Item label="Once a Month" value="3" />
-                                <Picker.Item label="Every Other Month" value="4" />
-                            </Picker>
-                        )}
-                        name="recurringType"
-                        defaultValue={expense ? expense.frequency.recurringType.toString() : "3" }
-                    />
-                </View>
+                    {
+                        canShowRecurringType ? 
+                        <View style={styles.fieldContainer}>
+                            <View style={{width: '40%', flexDirection: 'row'}}>
+                                <Text style={[styles.formLabel, {marginTop: 32}]}> Select Frequency </Text>
+                            </View>
+                            <Controller
+                                control={control}
+                                render={({ onChange, value }) => (
+                                    <Picker
+                                        value={value}
+                                        type="outlined"
+                                        style={styles.pickerContainer}
+                                        itemStyle={styles.pickerItem}
+                                        selectedValue={value.toString()}
+                                        onValueChange={value => onChange(value)}
+                                        value={value}
+                                    >
+                                        <Picker.Item label="Weekly" value="1" />
+                                        <Picker.Item label="Twice a Month" value="2" />
+                                        <Picker.Item label="Once a Month" value="3" />
+                                        <Picker.Item label="Every Other Month" value="4" />
+                                    </Picker>
+                                )}
+                                name="recurringType"
+                                defaultValue={expenseRef._id ? expenseRef.frequency.recurringType.toString() : "3" }
+                            />
+                        </View> : null
+                    }
+                
                 <View style={{paddingTop: 60}}>
+                    <Text style={styles.warningText}>{ isSubmitted && ( !isDirty || !isTouched ) && errors && !Object.keys(errors).length? 'No change detected.' : '' }</Text>
+                    <Text style={styles.warningText}>{ isSubmitted && errors && Object.keys(errors).length ? 'Please fix fields with errors.' : '' }</Text>
                     <Button
-                        raised
-                        buttonStyle={styles.primaryBtn}
-                        onPress={handleSubmit(onSubmitForm)}
-                        title="Save"
-                        TouchableComponent={TouchableOpacity}
-                    />
+                        mode="contained"
+                        dark
+                        style={styles.primaryBtn}
+                        onPress={handleSubmit(onSubmit)}
+                    >
+                        {expense._id ? 'Update' : 'Save'}
+                    </Button>
+                    { onDelete && expense._id?
+                        <Button
+                            color={Constants.errorText}
+                            mode="outlined"
+                            onPress={() => onDelete(expenseRef)}
+                            TouchableComponent={TouchableOpacity}
+                        >
+                            Delete
+                        </Button> : null
+                    }
                 </View>
             </View>
         </TouchableWithoutFeedback>
@@ -170,8 +195,16 @@ const styles = StyleSheet.create({
         color: Constants.errorText,
         marginVertical: 8
     },
+    warningText: {
+        fontSize: Constants.fontSmall,
+        color: Constants.errorText,
+        paddingVertical: 6
+    },
     primaryBtn: {
         backgroundColor: Constants.tintColor
+    },
+    deleteBtn: {
+        color: Constants.errorText
     }
 });
 
