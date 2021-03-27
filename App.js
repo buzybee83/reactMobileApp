@@ -1,7 +1,7 @@
 import 'react-native-gesture-handler';
 import React from 'react';
 import { Provider as PaperProvider } from 'react-native-paper';
-import { AsyncStorage, Platform, StatusBar } from 'react-native';
+import { Platform, StatusBar } from 'react-native';
 import * as SplashScreen from 'expo-splash-screen';
 import * as Font from 'expo-font';
 import { Ionicons } from '@expo/vector-icons';

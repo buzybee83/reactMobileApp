@@ -9,7 +9,9 @@ const expenseReducer = (prevState, action) => {
 	switch (action.type) {
 		case 'FETCH_EXPENSES':
 			return { ...prevState, expenses: action.payload };
-		case 'FETCH_EXPENSE':
+		case 'UPDATE_EXPENSE':
+			return { ...prevState, expense: action.payload };
+		case 'DELETED_EXPENSE':
 			return { ...prevState, expense: action.payload };
 		case 'HAS_ERROR':
 			return { ...prevState, errorMessage: action.payload };
@@ -22,7 +24,11 @@ const expenseReducer = (prevState, action) => {
 
 const createExpense = dispatch => async (data) => {
 	try {
-		await API.post(`/api/${data.budgetId}/expense`, data);
+		const response = await API.post(`/api/${data.budgetId}/expense`, data);
+		dispatch({
+			type: 'UPDATE_EXPENSE',
+			payload: response.data
+		});
 	} catch (err) {
 		const errorMssg = err.response && err.response.data.errmsg && err.response.data.errmsg.includes('duplicate') ?
 			'An expense with the same name already existst. Try changing the name.' :
@@ -36,11 +42,15 @@ const createExpense = dispatch => async (data) => {
 };
 
 const updateExpenseById = dispatch => async (expense) => {
-	console.log('UPDATING')
+	console.log('CONTEXT FN >> UPDATING')
 	const currentUser = await AsyncStorage.getItem('currentUser');
 	const { budgetId } = JSON.parse(currentUser);
 	try {
-		await API.post(`api/${budgetId}/expense/${expense._id}`, expense);
+		const response = await API.post(`api/${budgetId}/expense/${expense._id}`, expense);
+		dispatch({
+			type: 'UPDATE_EXPENSE',
+			payload: response.data
+		});
 	} catch (err) {
 		const errorMssg = 'Something went wrong while trying to delete this expense.';
 		dispatch({
@@ -72,6 +82,7 @@ const deleteExpenseById = dispatch => async (id) => {
 	const { budgetId } = JSON.parse(currentUser);
 	try {
 		await API.delete(`api/${budgetId}/expense/${id}`);
+		dispatch({ type: 'DELETED_EXPENSE', payload: { "deleted": true }  });
 	} catch (err) {
 		const errorMssg = 'Something went wrong while trying to delete this expense.';
 		dispatch({

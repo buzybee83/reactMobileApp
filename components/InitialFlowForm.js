@@ -1,10 +1,10 @@
 import React from 'react';
-import { StyleSheet, View, Switch, Picker } from 'react-native';
+import { StyleSheet, View, Switch } from 'react-native';
 import { Text } from 'react-native-elements';
-import { TextInputMask } from 'react-native-masked-text'
+import { TextInputMask } from 'react-native-masked-text';
+import { Picker } from '@react-native-community/picker';
 import RNDateTimePicker from '@react-native-community/datetimepicker';
-// TODO: Picker above is deprecated but not yet taken out of React-Native core so the new way below is not yet supported
-// import { Picker } from '@react-native-community/picker';
+
 
 import { Constants } from '../constants/Theme';
 

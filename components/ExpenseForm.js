@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Picker, TouchableWithoutFeedback, Keyboard, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import { View, StyleSheet, TouchableWithoutFeedback, Keyboard, TouchableOpacity } from 'react-native';
+import { Picker } from '@react-native-community/picker'
 import { useForm, Controller } from "react-hook-form";
 import { Text } from 'react-native-elements';
 import { TextInput, Switch, Button } from 'react-native-paper';
@@ -23,13 +24,13 @@ const ExpenseForm = ({ onSubmitForm, onDelete, expense, cancelForm }) => {
     const [canShowRecurringType, setCanShowRecurringType] = useState((expense._id ? expense.frequency.isRecurring : true));
     const daysInMonth = constructDaysInMonth();
     const [expenseRef, setExpenseRef] = expense._id ? useState(expense) : useState({});
-    const { isDirty, isSubmitted, isTouched } = formState;
+    const { isDirty, isSubmitted, isTouched, isValid, isValidating } = formState;
     const onSubmit = (data) => {
-        if (isDirty) {
+        if (isDirty && isValid) {
             onSubmitForm(data, expenseRef);
         } 
     };
-
+    console.log('expense ==', expense)
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
             <View>
@@ -59,15 +60,20 @@ const ExpenseForm = ({ onSubmitForm, onDelete, expense, cancelForm }) => {
                             mode="outlined"
                             keyboardType="numeric"
                             inputRef={ref}
-                            onChangeText={value => onChange(value ? parseInt(value) : "")}
-                            value={value ? value.toString() : ""}
+                            onChangeText={value => onChange(value)}
+                            value={value}
                         />
                     )}
-                    rules={{ required: true }}
+                    rules={{ required: true, pattern: /^[0-9]+(\.\d{1,2})?$/ }}
                     name="amount"
-                    defaultValue={expenseRef.amount? expenseRef.amount.toString() : ""}
+                    defaultValue={expenseRef.amount? expenseRef.amount.toFixed(2).toString() : ""}
                 />
-                {errors.amount && errors.amount.type == 'required' && <Text style={styles.hasError}>This is required.</Text>}
+                {errors.amount && errors.amount.type == 'required' && 
+                    <Text style={styles.hasError}>This is required.</Text>
+                }
+                {errors.amount && errors.amount.type == 'pattern' && !isValidating &&
+                    <Text style={styles.hasError}>Must be a valid number and up to 2 decimal places.</Text>
+                }
                 <View style={styles.fieldContainer}>
                     <View style={{width: '40%', flexDirection: 'row'}}>
                         <Text style={[styles.formLabel, {marginTop: 35}]}> Due Day </Text>
@@ -148,8 +154,12 @@ const ExpenseForm = ({ onSubmitForm, onDelete, expense, cancelForm }) => {
                     }
                 
                 <View style={{paddingTop: 60}}>
-                    <Text style={styles.warningText}>{ isSubmitted && ( !isDirty || !isTouched ) && errors && !Object.keys(errors).length? 'No change detected.' : '' }</Text>
-                    <Text style={styles.warningText}>{ isSubmitted && errors && Object.keys(errors).length ? 'Please fix fields with errors.' : '' }</Text>
+                    <Text style={styles.warningText}>
+                    { isSubmitted && ( !isDirty && !isTouched ) && !Object.keys(errors).length ? 'No change detected.' : 
+                        (Object.keys(errors).length && !isValidating ? 'Please fix fields with errors.' : '' )
+                    }
+                    </Text>
+                    
                     <Button
                         mode="contained"
                         dark
