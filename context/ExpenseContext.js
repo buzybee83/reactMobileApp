@@ -10,9 +10,15 @@ const expenseReducer = (prevState, action) => {
 		case 'FETCH_EXPENSES':
 			return { ...prevState, expenses: action.payload };
 		case 'UPDATE_EXPENSE':
-			return { ...prevState, expense: action.payload };
+			prevState.expenses = prevState.expenses.map(x => {
+				if (x._id == action.payload._id) {
+					x = action.payload;
+				}
+				return x;
+			})
+			return { ...prevState };
 		case 'DELETED_EXPENSE':
-			return { ...prevState, expense: action.payload };
+			return { ...prevState, expenses: prevState.expenses.filter(x => x._id !== action.payload.id) };
 		case 'HAS_ERROR':
 			return { ...prevState, errorMessage: action.payload };
 		case 'CLEAR_ERROR':
@@ -82,7 +88,7 @@ const deleteExpenseById = dispatch => async (id) => {
 	const { budgetId } = JSON.parse(currentUser);
 	try {
 		await API.delete(`api/${budgetId}/expense/${id}`);
-		dispatch({ type: 'DELETED_EXPENSE', payload: { "deleted": true }  });
+		dispatch({ type: 'DELETED_EXPENSE', payload: { id }  });
 	} catch (err) {
 		const errorMssg = 'Something went wrong while trying to delete this expense.';
 		dispatch({
@@ -100,5 +106,5 @@ const clearError = dispatch => () => {
 export const { Provider, Context } = createDataContext(
 	expenseReducer,
 	{ createExpense, fetchExpenses, fetchExpenseById, updateExpenseById, deleteExpenseById, clearError },
-	{ expenses: [], expense: {}, errorMessage: '' }
+	{ expenses: [], errorMessage: '' }
 )

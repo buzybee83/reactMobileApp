@@ -30,7 +30,6 @@ const ExpenseForm = ({ onSubmitForm, onDelete, expense, cancelForm }) => {
             onSubmitForm(data, expenseRef);
         } 
     };
-    console.log('expense ==', expense)
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
             <View>
