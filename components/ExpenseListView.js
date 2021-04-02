@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
 	Text,
 	StyleSheet,
@@ -19,6 +19,16 @@ const WINDOW_WIDTH = Dimensions.get('window').width;
 
 const ExpenseListView = ({ expenses, onUpdate, onDelete, onViewDetails }) => {
 	const [action, setAction] = useState('');
+	const [items, setItems] = useState('');
+	const [loading, setLoading] = useState(true);
+	
+	useEffect(() => {
+		if (expenses) {
+			setItems(expenses);
+			setLoading(false);
+		}
+	}, [expenses]);
+
 	const ContentTitle = ({ item }) => {
 		return (
 			<View style={styles.titleContainer}>
@@ -56,7 +66,6 @@ const ExpenseListView = ({ expenses, onUpdate, onDelete, onViewDetails }) => {
 		await onUpdate(rowKey);
 		setAction('');
 		closeRow(rowMap, rowKey);
-
 	};
 
 	const deleteRow = async (rowMap, rowKey) => {
@@ -143,8 +152,10 @@ const ExpenseListView = ({ expenses, onUpdate, onDelete, onViewDetails }) => {
 	);
 
 	const itemToId = useCallback(item => item._id, []);
-
-	if (expenses.length) {
+	
+	if (loading) {
+		return <ActivityIndicator animating={true} style={{ paddingVertical: 65 }}  color="white" />;
+	} else if (items && items.length) {
 		return (
 			<View style={styles.container}>
 				<SwipeListView
@@ -165,6 +176,10 @@ const ExpenseListView = ({ expenses, onUpdate, onDelete, onViewDetails }) => {
 		return (
 			<Card style={styles.noContentContainer}>
 				<Text style={styles.noItemsText}>No expenses found.</Text>
+				<View style={styles.helpTextContainer}>
+					<MaterialIcons name="info" size={34} color={Constants.primaryColor} />
+					<Text style={styles.helpText}>Start adding your monthly expenses here by pressing the [+] button bellow.</Text>
+				</View>
 			</Card>
 		)
 	}
@@ -174,18 +189,27 @@ const styles = StyleSheet.create({
 	noContentContainer: {
 		alignSelf: 'center',
 		flexDirection: "column",
-		width: (WINDOW_WIDTH - 25),
-		height: '10%',
-		marginTop: 8,
+		width: (WINDOW_WIDTH - 1),
+		height: '20%',
+		marginTop: 2,
 		paddingTop: 24
 	},
 	noItemsText: {
 		alignSelf: 'center',
 		fontSize: Constants.fontMedium,
 	},
+	helpTextContainer: {
+		display: 'flex',
+		flexDirection: 'row',
+		padding: 24
+	},
+	helpText: {
+		marginHorizontal: 18,
+		paddingEnd: 6
+	},
 	container: {
 		backgroundColor: 'white',
-		marginTop: 4
+		marginTop: 2
 	},
 	rowContainer: {
 		backgroundColor: 'white',

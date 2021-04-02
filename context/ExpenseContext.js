@@ -106,5 +106,5 @@ const clearError = dispatch => () => {
 export const { Provider, Context } = createDataContext(
 	expenseReducer,
 	{ createExpense, fetchExpenses, fetchExpenseById, updateExpenseById, deleteExpenseById, clearError },
-	{ expenses: [], errorMessage: '' }
+	{ expenses: null, errorMessage: '' }
 )

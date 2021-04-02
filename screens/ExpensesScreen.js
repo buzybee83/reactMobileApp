@@ -1,9 +1,8 @@
-import React, { useEffect, useContext, useState, useCallback } from 'react';
+import React, { useEffect, useContext, useState } from 'react';
 import {
 	SafeAreaView,
 	Text,
 	StyleSheet,
-	Dimensions,
 } from 'react-native';
 import {
 	ActivityIndicator,
@@ -19,8 +18,6 @@ import { Context as BudgetContext } from '../context/BudgetContext';
 import { ButtonIcon } from '../components/Icons';
 import ExpenseListView from '../components/ExpenseListView';
 import ExpenseForm from '../components/ExpenseForm';
-
-const WINDOW_WIDTH = Dimensions.get('window').width;
 
 const ExpensesScreen = () => {
 	const {
@@ -43,9 +40,13 @@ const ExpensesScreen = () => {
 
 	useEffect(() => {
 		setListState({ ...listState, isLoading: true });
-		refreshExpenseData();
-		setListState({ ...listState, isLoading: false });
-		console.log('state >> ', state.expenses)
+		try {
+			refreshExpenseData();
+		} catch(err) {
+			console.warn(`Error loading Expenses. ${err}`)
+		} finally {
+			setListState({ ...listState, isLoading: false });
+		}
 	}, [!listState.isSaving]);
 
 	const togglePaid =  async (id) => {
@@ -112,10 +113,10 @@ const ExpensesScreen = () => {
 	const editExpense = (id, title) => {
 		const expense = state.expenses.filter(item => item._id == id)[0];
 		setExpense(expense);
-		openModalForm(title);
+		openModalForm(null, title);
 	};
 
-	const openModalForm = (title) => {
+	const openModalForm = (ev, title) => {
 		if (title) setTitle(title);
 		else setTitle('Add Expense');
 		setModalVisible(true);
@@ -128,8 +129,8 @@ const ExpensesScreen = () => {
 
 	return (
 		<SafeAreaView style={styles.container}>
-			{listState.isLoading && !state.expenses.length? 
-				<ActivityIndicator animating={true} style={{ paddingVertical: 30 }} /> :
+			{listState.isLoading ? 
+				<ActivityIndicator animating={true} style={{ paddingVertical: 45 }} color={Constants.primaryColor}/> :
 				<>
 					<ExpenseListView 
 						expenses={state.expenses} 
@@ -146,7 +147,7 @@ const ExpensesScreen = () => {
 							>
 								<>
 									<Text style={styles.modalTextHeader}>
-										{formTitle}
+										{ formTitle }
 									</Text>
 									<Divider style={{ height: 2 }} />
 									{listState.isSaving ?
@@ -183,23 +184,6 @@ const styles = StyleSheet.create({
 		justifyContent: 'center',
 		...DarkTheme
 	},
-	contentContainer: {
-		alignSelf: 'center',
-		flexDirection: "column",
-		width: (WINDOW_WIDTH - 25)
-	},
-	noItems: {
-		alignSelf: 'center',
-		fontSize: Constants.fontMedium,
-	},
-	header: {
-		position: 'absolute',
-		top: 130,
-		fontSize: 30,
-		alignSelf: 'center',
-		color: '#fff',
-		marginBottom: 20
-	},
 	actionButton: {
 		position: 'absolute',
 		bottom: 8,
@@ -225,17 +209,3 @@ const styles = StyleSheet.create({
 });
 
 export default ExpensesScreen;
-
-
-// {(state.expenses).map((item, key) => {
-// 	{console.log('ITEM =',item)}
-// 	<List.Accordion
-// 		key={key}
-// 		title={item.name}
-// 		left={props => <List.Icon {...props} icon="chevron-forward-outline" />}
-// 		description={item.dueDay}
-// 		expanded={expanded}
-// 		onPress={toggleAccordion}>
-// 		<List.Item title={item.anount} />
-// 	</List.Accordion>
-// })}

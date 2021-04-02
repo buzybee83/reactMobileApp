@@ -73,7 +73,7 @@ function getHeaderTitle(route) {
 	switch (routeName) {
 		case 'Home':
 			return 'Month Overview';
-		case 'Profile':
+		case 'Expenses':
 			return 'Monthly Expenses';
 		case 'Account':
 			return 'My Account';

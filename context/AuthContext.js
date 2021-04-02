@@ -1,7 +1,6 @@
 import { AsyncStorage } from 'react-native';
 import createDataContext from './createDataContext';
 import API from '../clientAPI/api';
-import { switchNavigation, resetNavigation } from '../services/navigationServices';
 
 const authReducer = (state, action) => {
 	// console.log('AuthReducer::ACTION === ', action);
