@@ -11,7 +11,7 @@ const budgetReducer = (prevState, action) => {
 		case 'FETCH_BUDGET':
 			return { ...prevState, budget: action.payload, isCurrent: action.isCurrent, errorMessage: '' };
 		case 'UPDATED_BUDGET':
-			return { ...prevState, budget: action.payload };
+			return { ...prevState, budget: action.payload, isCurrent: action.isCurrent };
 		case 'HAS_ERROR':
 			return { ...prevState, errorMessage: action.payload };
 		case 'CLEAR_ERROR':
@@ -31,7 +31,7 @@ const createBudget = dispatch => async (settings) => {
 		const response = await API.post('api/budget', budget);
 		currentUser.budgetId = response.data._id
 		await AsyncStorage.setItem('currentUser', JSON.stringify(currentUser));
-		switchNavigation('Home');
+		dispatch({ type: 'FETCH_BUDGET', payload: response.data, isCurrent: true });
 	} catch (err) {
 		console.log('CREATION ERROR ==== \n', err.response.data.error)
 		let errorMssg;

@@ -56,6 +56,13 @@ const styles = StyleSheet.create({
 	left: {
 		display: 'flex',
 		marginRight: 6
+	},
+	center: {
+		display: 'flex',
+		justifyContent: 'center',
+		alignItems: 'center',
+		alignSelf: 'center',
+		textAlign: 'center',
 	}
 });
 

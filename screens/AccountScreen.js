@@ -1,12 +1,16 @@
 import React, { useContext } from 'react';
-import { Image, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { CommonActions } from '@react-navigation/native';
+import { ScrollView, Platform, StyleSheet, Text, Image, TouchableOpacity, View } from 'react-native';
 import { Button } from 'react-native-elements';
-import { ScrollView } from 'react-native-gesture-handler';
 import * as WebBrowser from 'expo-web-browser';
 import { Context as AuthContext } from '../context/AuthContext';
 
 export default function HomeScreen({ navigation }) {
     const { logout } = useContext(AuthContext);
+    const handleLogout = async () => {
+        await logout();
+        navigation.replace('Main', {screen: 'Auth'});
+    }
 
     return (
         <View style={styles.container}>
@@ -31,7 +35,7 @@ export default function HomeScreen({ navigation }) {
                 </View>
 
                 <View style={styles.helpContainer}>
-                    <Button onPress={logout} style={styles.helpLink} title="Logout" />
+                    <Button onPress={handleLogout} style={styles.helpLink} title="Logout" />
                 </View>
             </ScrollView>
         </View>

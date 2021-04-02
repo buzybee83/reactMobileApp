@@ -8,11 +8,11 @@ const authReducer = (state, action) => {
 	// console.log('AuthReducer::STATE === ', state);
 	switch (action.type) {
 		case 'RESTORE_TOKEN':
-			return { ...state, userToken: action.payload.token, homeScreen: action.payload.homeScreen, isAuthenticated: true };
+			return { ...state, userToken: action.payload, route: action.route, isAuthenticated: true };
 		case 'LOGIN':
-			return { errorMessage: '', userToken: action.payload, homeScreen: action.payload.homeScreen, isAuthenticated: true };
+			return { errorMessage: '', userToken: action.payload, route: action.route, isAuthenticated: true };
 		case 'LOGOUT':
-			return { errorMessage: '', userToken: null, isAuthenticated: false };
+			return { errorMessage: '', userToken: null, isAuthenticated: false, route: 'Auth' };
 		case 'HAS_ERROR':
 			return { ...state, errorMessage: action.payload, isAuthenticated: false };
 		case 'CLEAR_ERROR':
@@ -30,13 +30,11 @@ const signup = dispatch => async ({ firstName, lastName, email, password }) => {
 	try {
 		const response = await API.post('api/signup', { firstName, lastName, email, password });
 		await AsyncStorage.setItem('currentUser', JSON.stringify(response.data));
-		dispatch({ type: 'LOGIN', payload: response.data.token });
-		switchNavigation('Intro');
+		dispatch({ type: 'LOGIN', payload: response.data.token, route: 'Intro' });
 	} catch (err) {
-		console.log('SIGNUP ERROR ==== ', err)
 		const errorMssg = err.response && err.response.data.errmsg && err.response.data.errmsg.includes('duplicate') ?
 			'An account with this email already exists. Try loging in or reset your password' :
-			'Something went wrong while trying to create your account.';
+			`Something went wrong while trying to create your account. ${err}`;
 		dispatch({
 			type: 'HAS_ERROR',
 			payload: errorMssg
@@ -49,16 +47,14 @@ const login = dispatch => async ({ email, password }) => {
 		const response = await API.post('api/login', { email, password });
 		await AsyncStorage.setItem('currentUser', JSON.stringify(response.data));
 		if (response.data.budgetId) {
-			dispatch({ type: 'LOGIN', payload: {token: response.data.token, homeScreen: 'Home' }});
+			dispatch({ type: 'LOGIN', payload: response.data.token, route: 'Home' });
 		} else {
-			dispatch({ type: 'LOGIN', payload: {token: response.data.token, homeScreen: 'Intro' }});
+			dispatch({ type: 'LOGIN', payload: response.data.token, route: 'Intro' });
 		}
-		// else switchNavigation('Intro');
 	} catch (err) {
-		console.log('LOGIN ERROR == ', err);
 		const errorMssg = err.response && err.response.data.error ?
 			err.response.data.error :
-			'Something went wrong while tryign to log you in, please try later.';
+			`Something went wrong while tryign to log you in, please try later. ${err}`;
 		dispatch({
 			type: 'HAS_ERROR',
 			payload: errorMssg
@@ -67,15 +63,8 @@ const login = dispatch => async ({ email, password }) => {
 };
 
 const logout = dispatch => async () => {
-	try {
-		await AsyncStorage.removeItem('currentUser');
-		dispatch({ type: 'LOGOUT' });
-		resetNavigation();
-		// navigate('Auth');
-	} catch (err) {
-		console.log('LOGOUT ERROR ===> ', err)
-		resetNavigation();
-	}
+	await AsyncStorage.removeItem('currentUser');
+	dispatch({ type: 'LOGOUT'});
 };
 
 const bootstrapAuthAsync = dispatch => async () => {
@@ -83,19 +72,18 @@ const bootstrapAuthAsync = dispatch => async () => {
 		let currentUser = await AsyncStorage.getItem('currentUser');
 		currentUser = JSON.parse(currentUser);
 		if (currentUser.budgetId) {
-			dispatch({ type: 'RESTORE_TOKEN', payload: {token: currentUser.token, homeScreen: 'Home'} });
+			dispatch({ type: 'RESTORE_TOKEN', payload: currentUser.token, route: 'Home' });
 		} else {
-			dispatch({ type: 'RESTORE_TOKEN', payload: {token: currentUser.token, homeScreen: 'Intro'} });
+			dispatch({ type: 'RESTORE_TOKEN', payload: currentUser.token, route: 'Intro'});
 		}
-			
 	} catch (err) {
 		// No token found!
-		resetNavigation();
+		dispatch({ type: 'LOGOUT'});
 	}
 }
 
 export const { Provider, Context } = createDataContext(
 	authReducer,
 	{ signup, login, logout, clearErrorMessage, bootstrapAuthAsync },
-	{ isAuthenticated: false, homeScreen: '', errorMessage: '' }
+	{ isAuthenticated: false, route: '', errorMessage: '' }
 );

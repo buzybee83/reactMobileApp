@@ -17,7 +17,7 @@ const constructDaysInMonth = () => {
     return days;
 }
 
-const ExpenseForm = ({ onSubmitForm, onDelete, expense, cancelForm }) => {
+const ExpenseForm = ({ onSubmitForm, onDelete, expense }) => {
     const { control, handleSubmit, formState, errors, reset  } = useForm({
         mode: 'onChange',
     });

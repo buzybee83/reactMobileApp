@@ -14,33 +14,53 @@ import HomeStack from './HomeStack';
 //APP STACK
 const AppStack = createStackNavigator();
 
-export default function AppRouter(props) {
+const MainStack = createStackNavigator();
+
+export default function AppRouter() {
+    const MainNavigator = () => {
+        return (
+            <MainStack.Navigator headerMode="none">
+                <AppStack.Screen
+                    name="Auth"
+                    component={AuthStack}
+                />
+                <AppStack.Screen
+                    name="Intro"
+                    component={IntroStack}
+                />
+                <AppStack.Screen
+                    options={{
+                        headerLeft: null
+                    }}
+                    name="Home"
+                    component={HomeStack}
+                />                   
+            </MainStack.Navigator>
+        );
+    };
+
     return (
         <AuthProvider>
             <BudgetProvider>
                 <ExpenseProvider>
                     <AppStack.Navigator 
                         headerMode="none"
-                        initialRouteName="Loading">
+                        initialRouteName="Loading"
+                        options={{
+                            headerLeft: null
+                        }}>
                         <AppStack.Screen
                             name="Loading"
                             component={AuthLoading}
                         />
                         <AppStack.Screen
-                            name="Auth"
-                            component={AuthStack}
-                        />
-                        <AppStack.Screen
-                            name="Intro"
-                            component={IntroStack}
-                        />
-                        <AppStack.Screen
-                            name="Home"
-                            component={HomeStack}
-                        />                        
+                            name="Main"
+                            component={MainNavigator}
+                        /> 
                     </AppStack.Navigator>
                 </ExpenseProvider>
             </BudgetProvider>
         </AuthProvider>
     );
 }
+

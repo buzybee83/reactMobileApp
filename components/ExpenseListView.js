@@ -3,16 +3,13 @@ import {
 	Text,
 	StyleSheet,
 	View,
-    Dimensions,
-	Animated,
-	Easing
+	Dimensions,
+	TouchableOpacity,
+	TouchableHighlight,
 } from 'react-native';
-import {
-	Card,
-	List,
-} from 'react-native-paper';
+import { ActivityIndicator,	Card } from 'react-native-paper';
 import { MaterialIcons } from '@expo/vector-icons';
-import SwipeActionList from 'react-native-swipe-action-list';
+import { SwipeListView } from 'react-native-swipe-list-view';
 import { Constants } from '../constants/Theme';
 import { nth } from '../services/utilHelper';
 import { ButtonIcon } from '../components/Icons';
@@ -20,12 +17,11 @@ import ItemDetails from '../components/ItemDetails';
 
 const WINDOW_WIDTH = Dimensions.get('window').width;
 
-const ExpenseListView = ({ expenses, onDelete, onExpand }) => {
-    [expanded, setExpanded] = useState('');
-
-    const ContentTitle = ({ item }) => {
+const ExpenseListView = ({ expenses, onUpdate, onDelete, onViewDetails }) => {
+	const [action, setAction] = useState('');
+	const ContentTitle = ({ item }) => {
 		return (
-			<View style={styles.accordionTitleContainer}>
+			<View style={styles.titleContainer}>
 				<Text style={styles.titleText}>{item.name}</Text>
 				<Text style={styles.titleText}>${item.amount.toFixed(2)}</Text>
 			</View>
@@ -33,10 +29,15 @@ const ExpenseListView = ({ expenses, onDelete, onExpand }) => {
 	}
 
 	const ContentDescription = ({ day, isPaid, isRecurring }) => {
-		const textColor = isPaid ? { color: Constants.successColor } : { color: Constants.errorText };
+		const textColor = isPaid ? { color: Constants.successColor, marginTop: -6 } : { color: Constants.errorText };
 		return (
-			<View style={styles.accordionTitleContainer}>
-				<Text style={[styles.infoText, textColor]}>{isPaid ? 'Paid' : 'Not Paid'}</Text>
+			<View style={styles.descriptionContainer}>
+				<Text style={[styles.infoText, textColor]}>{isPaid ?
+					<MaterialIcons
+						size={28}
+						name="check"
+					/> : 'Not Paid'}
+				</Text>
 				<Text style={styles.infoText}>
 					{`${!isRecurring ? 'One-Time - ' : ''}Due: ${day}${nth(day)} of ${new Date().toLocaleString('default', { month: 'long' })}`}
 				</Text>
@@ -44,117 +45,173 @@ const ExpenseListView = ({ expenses, onDelete, onExpand }) => {
 		)
 	};
 
-	const PaidRowBack = () => (
-		<View style={styles.leftHiddenContainer}>
-			<MaterialIcons
-				size={32}
-				name="check"
-			/>
-		</View>
-	);
-
-	const TrashRowBack = () => (
-		<View style={styles.rightHiddenContainer}>
-			<MaterialIcons
-				name="delete"
-				size={32}
-			/>
-		</View>
-	);
-
-    const toggleAccordion = (key) => {
-		console.log(key == expanded)
-        onExpand && onExpand();
-
-		if (key == expanded) {
-			setExpanded({ expanded: '' });
-			console.log('clearing ', expanded)
-		} else {
-			setExpanded({ expanded: key });
-			console.log(expanded);
+	const closeRow = (rowMap, rowKey) => {
+		if (rowMap[rowKey]) {
+			rowMap[rowKey].closeRow();
 		}
 	};
 
-	const itemToId = useCallback(item => item._id, []);
+	const toggleCheck = async (rowMap, rowKey) => {
+		setAction('update');
+		await onUpdate(rowKey);
+		setAction('');
+		closeRow(rowMap, rowKey);
 
-	const renderAccordionItem = useCallback(data => {
-		const item = data.item;
-		return (
-			<List.Accordion
-				theme={{ colors: { primary: Constants.primaryColor } }}
-				style={styles.accordionContainer}
-				title={<ContentTitle item={item} />}
-				left={props => {
-					return (
-						<ButtonIcon
-							size={28}
-							position="left"
-							{...props}
-							name="documents-outline"
-						/>
-					)
-				}}
-				description={
+	};
+
+	const deleteRow = async (rowMap, rowKey) => {
+		console.log('DELETING >>', rowMap[rowKey]);
+		setAction('delete');
+		await onDelete(rowKey);
+		closeRow(rowMap, rowKey);
+		setAction('');
+	};
+
+	const viewDetails = (rowMap, rowKey) => {
+		closeRow(rowMap, rowKey);
+		onViewDetails(rowKey, 'Expense Details');
+	}
+
+	const onRowDidOpen = rowKey => {
+		console.log('This row opened', rowKey);
+	};
+
+	const renderItem = ({ item }) => (
+		<TouchableHighlight
+			onPress={() => console.log('You touched me')}
+			style={styles.rowContainer}
+		>
+			<View style={styles.rowContent}>
+				<ButtonIcon
+					size={28}
+					position="left"
+					name="documents-outline"
+				/>
+				<View style={styles.rowContentItems}>
+					<ContentTitle item={item} />
 					<ContentDescription
 						day={item.dueDay}
 						isPaid={item.isPaid}
 						isRecurring={item.frequency.isRecurring}
 					/>
-				}
-				expanded={expanded === item._id}
-				onPress={() => toggleAccordion(item._id)}>
-				<List.Item
-					style={styles.accordionFormContainer}
-					title="Expense"
-					description={<ItemDetails item={item} />}
-				/>
-			</List.Accordion>
-		);
-	}, []);
+				</View>
+			</View>
+		</TouchableHighlight>
+	);
 
-    if (expenses.length) {
-        return (
-            <List.Section>
-                <SwipeActionList
-                    keyExtractor={itemToId}
-                    data={expenses}
-                    renderItem={renderAccordionItem}
-                    renderLeftHiddenItem={PaidRowBack}
-                    renderRightHiddenItem={TrashRowBack}
-                    onSwipeLeft={onDelete}
-                />
-            </List.Section>
-        );
-    } else {
-        return (
-            <Card style={styles.contentContainer}>
-                <Text style={styles.noItems}>No expenses found.</Text>
-            </Card>
-        )
-    }
+	const renderHiddenItem = (data, rowMap) => (
+		<View style={styles.rowBack}>
+			<TouchableOpacity
+				style={styles.backLeftBtn}
+				onPress={() => toggleCheck(rowMap, data.item._id)}
+			>
+				{action == 'update' ?
+					<ActivityIndicator animating={true} color={Constants.primaryColor} /> :
+					<>
+						<MaterialIcons
+							size={28}
+							name={data.item.isPaid ? 'close' : 'check'}
+						/>
+						<Text style={{ paddingTop: 8 }}>{data.item.isPaid ? 'Not Paid' : 'Paid'}</Text>
+					</>
+				}
+			</TouchableOpacity>
+			<TouchableOpacity
+				style={[styles.backRightBtn, styles.backRightBtnLeft]}
+				onPress={() => deleteRow(rowMap, data.item._id)}
+			>
+				{action == 'delete' ?
+					<ActivityIndicator animating={true} color="white" /> :
+					<MaterialIcons
+						name="delete"
+						size={30}
+						color="white"
+					/>
+				}
+			</TouchableOpacity>
+			<TouchableOpacity
+				style={[styles.backRightBtn, styles.backRightBtnRight]}
+				onPress={() => viewDetails(rowMap, data.item._id)}
+			>
+				<MaterialIcons
+					name="remove-red-eye"
+					size={30}
+					color="white"
+				/>
+			</TouchableOpacity>
+		</View>
+	);
+
+	const itemToId = useCallback(item => item._id, []);
+
+	if (expenses.length) {
+		return (
+			<View style={styles.container}>
+				<SwipeListView
+					data={expenses}
+					keyExtractor={itemToId}
+					renderItem={renderItem}
+					renderHiddenItem={renderHiddenItem}
+					leftOpenValue={95}
+					rightOpenValue={-150}
+					previewRowKey={'0'}
+					previewOpenValue={-40}
+					previewOpenDelay={3500}
+					onRowDidOpen={onRowDidOpen}
+				/>
+			</View>
+		);
+	} else {
+		return (
+			<Card style={styles.noContentContainer}>
+				<Text style={styles.noItemsText}>No expenses found.</Text>
+			</Card>
+		)
+	}
 };
 
 const styles = StyleSheet.create({
-	contentContainer: {
+	noContentContainer: {
 		alignSelf: 'center',
 		flexDirection: "column",
 		width: (WINDOW_WIDTH - 25),
-        height: '10%',
-        marginTop: 8,
-        paddingTop: 24
+		height: '10%',
+		marginTop: 8,
+		paddingTop: 24
 	},
-	noItems: {
+	noItemsText: {
 		alignSelf: 'center',
 		fontSize: Constants.fontMedium,
 	},
-	accordionContainer: {
-		paddingStart: 20,
+	container: {
 		backgroundColor: 'white',
-		marginBottom: 1,
+		marginTop: 4
 	},
-	accordionTitleContainer: {
-		width: '100%',
-		display: 'flex',
+	rowContainer: {
+		backgroundColor: 'white',
+		borderBottomColor: '#ccc',
+		borderBottomWidth: 1,
+		height: 65,
+	},
+	rowContent: {
+		flex: 1,
+		flexDirection: "row",
+		paddingStart: 20,
+		alignItems: 'center'
+	},
+	rowContentItems: {
+		flex: 1,
+		flexDirection: "column",
+		paddingEnd: 20
+	},
+	titleContainer: {
+		flex: 1,
+		paddingTop: 10,
+		flexDirection: 'row',
+		justifyContent: 'space-between',
+	},
+	descriptionContainer: {
+		flex: 1,
 		flexDirection: 'row',
 		justifyContent: 'space-between',
 	},
@@ -166,35 +223,33 @@ const styles = StyleSheet.create({
 		fontSize: Constants.fontSmall,
 		color: '#4c4c4c',
 	},
-	leftHiddenContainer: {
+	rowBack: {
+		backgroundColor: '#DDD',
 		flex: 1,
 		flexDirection: 'row',
+		justifyContent: 'space-between',
 		alignItems: 'center',
+		paddingLeft: 10,
 	},
-	rightHiddenContainer: {
-		flex: 1,
+	backLeftBtn: {
 		flexDirection: 'row',
+	},
+	backRightBtn: {
 		alignItems: 'center',
-		justifyContent: 'flex-end',
-	},
-	accordionFormContainer: {
-		borderTopWidth: 1,
-		paddingLeft: 16,
-		borderTopColor: Constants.whiteColor,
-		backgroundColor: 'white',
-		marginBottom: 3
-	},
-	actionButton: {
-		paddingLeft: 12,
-		width: 70,
-		height: 70,
-		justifyContent: 'flex-end',
+		bottom: 0,
+		justifyContent: 'center',
 		position: 'absolute',
-		bottom: 16,
-		right: 16,
-		borderRadius: 100,
-		backgroundColor: Constants.secondaryColor
-    }
+		top: 0,
+		width: 75,
+	},
+	backRightBtnLeft: {
+		backgroundColor: Constants.errorBackground,
+		right: 75,
+	},
+	backRightBtnRight: {
+		backgroundColor: Constants.primaryColor,
+		right: 0,
+	},
 });
 
 export default ExpenseListView;

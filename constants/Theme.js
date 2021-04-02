@@ -44,6 +44,7 @@ const Constants = {
     backgroundColor: primaryColor,
   },
   buttonTextLarge: {
+    color: '#fff',
     fontSize: 20,
     fontWeight: '500'
   },

@@ -1,8 +1,8 @@
-import React, { useContext } from 'react';
-import { StyleSheet, View, ViewBase } from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
+import React, { useContext, useEffect } from 'react';
+import { StyleSheet, View } from 'react-native';
+import { useFocusEffect, StackActions } from '@react-navigation/native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scrollview';
-import { Card } from 'react-native-elements';
+import { Card, Text } from 'react-native-elements';
 
 import { Constants, DarkTheme } from '../constants/Theme';
 import { Context as AuthContext } from '../context/AuthContext';
@@ -13,20 +13,26 @@ import WaveShape from '../components/WaveShape';
 
 const SignupScreen = ({ navigation }) => {
     const { state, signup, clearErrorMessage } = useContext(AuthContext);
-
+   
     useFocusEffect(
         React.useCallback(() => {
-
-            return () => {
-                clearErrorMessage();
-            };
+            if (state.errorMessage) return clearErrorMessage();
+            return;
         }, [])
     );
 
+    useEffect(() => {
+        if (state.route && state.route !== 'Auth') {
+            navigation.dispatch(
+                StackActions.replace('Main', {screen: state.route})
+            );
+        }
+    }, [state.route]);
+    
     return (
         <View style={styles.container}>
-            
             <KeyboardAwareScrollView contentContainerStyle={styles.cardContainer}>
+                <Text style={styles.header}> Let's Get Started! </Text>
                 <Card containerStyle={Constants.boxShadow}>
                     <AuthForm
                         type="Signup"
@@ -50,13 +56,21 @@ const SignupScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: DarkTheme.darkBackground
+        ...DarkTheme
+    },
+    header: {
+        position: "absolute",
+        top: 90,
+        fontSize: 30,
+        alignSelf: "center",
+        color: '#fff',
+        marginBottom: 20
     },
     cardContainer: {
         flex: 1,
         alignContent: 'center',
         justifyContent: 'center',
-        backgroundColor: DarkTheme.darkBackground
+        ...DarkTheme
     }
 });
 

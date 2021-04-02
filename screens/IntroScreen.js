@@ -7,6 +7,7 @@ import {
 	Keyboard,
 	KeyboardAvoidingView
 } from 'react-native';
+import { StackActions } from '@react-navigation/native';
 import update from 'react-addons-update';
 import { Text, Button } from 'react-native-elements';
 import { Ionicons } from '@expo/vector-icons';
@@ -26,7 +27,7 @@ export default class IntroScreen extends React.Component {
 		currentSlide: 0,
 		isLoading: false,
 		slides: ConstructSlides()
-	}
+	};
 
 	componentDidMount = () => {
 		if (this.context.errorMessage) {
@@ -208,13 +209,19 @@ export default class IntroScreen extends React.Component {
 		this.AppIntroSlider.goToSlide(this.state.slides.length - 1, true);
 	};
 
-	onDone = () => {
+	onDone = async () => {
 		if (this.context.errorMessage) {
 			this.context.clearError();
 		}
 		const introStatus = this.state.introSkipped ? 'SKIPPED' : 'COMPLETE';
-		this.context.createBudget(DeconstructSlides(this.state.slides, introStatus));
+		await this.context.createBudget(DeconstructSlides(this.state.slides, introStatus));
+		if (this.context.state.budget) {
+			this.props.navigation.dispatch(
+                StackActions.replace('Main', { screen: 'Home' })
+            );
+		}
 	};
+
 	static contextType = BudgetContext;
 
 	render() {

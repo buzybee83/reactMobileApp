@@ -4,8 +4,6 @@ import {
 	Text,
 	StyleSheet,
 	Dimensions,
-	Animated,
-	Easing
 } from 'react-native';
 import {
 	ActivityIndicator,
@@ -34,7 +32,8 @@ const ExpensesScreen = () => {
 	} = useContext(ExpenseContext);
 	const { state: { budget } } = useContext(BudgetContext);
 	const [expense, setExpense] = useState({});
-	const [listState, setListState] = useState({ isLoading: true, isSaving: false, accordionExpanded: '' });
+	const [formTitle, setTitle] = useState('');
+	const [listState, setListState] = useState({ isLoading: true, isSaving: false });
 	const [modalVisible, setModalVisible] = useState(false);
 
 	const refreshExpenseData = React.useCallback(async () => {
@@ -46,10 +45,20 @@ const ExpensesScreen = () => {
 		setListState({ ...listState, isLoading: true });
 		refreshExpenseData();
 		setListState({ ...listState, isLoading: false });
+		console.log('state >> ', state.expenses)
 	}, [!listState.isSaving]);
 
-	const openModalForm = () => {
-		setModalVisible(true);
+	const togglePaid =  async (id) => {
+		setListState({ ...listState, isSaving: true });
+		const updatedItem = state.expenses.filter(item => item._id === id)[0];
+		try {
+			updatedItem.isPaid = !updatedItem.isPaid;
+			await updateExpenseById(updatedItem);
+		} catch (err) {
+			console.warn('ERROR OCCURED IN SAVING EXPENSE ==', err)
+		} finally {
+			setListState({ ...listState, isSaving: false });
+		}
 	};
 
 	const onSubmitExpense = async (data, expenseRef) => {
@@ -84,29 +93,32 @@ const ExpensesScreen = () => {
 			console.warn('ERROR OCCURED IN SAVING EXPENSE ==', err)
 		} finally {
 			hideModal();
-			setListState({ ...listState, isSaving: false, accordionExpanded: '' });
+			setListState({ ...listState, isSaving: false });
 		}
 	};
 
 	const deleteExpense = async (id) => {
 		try {
-			setListState({ ...listState, accordionExpanded: '' });
 			await deleteExpenseById(id);
 		} catch (err) {
 			console.warn(err);
 		} finally {
-			hideModal();
+			if (modalVisible) {
+				hideModal();
+			}
 		}
 	};
 
-	const toggleExpanded = () => {
-		listState.accordionExpanded = !listState.accordionExpanded;
-		setListState({ ...listState });
-	}
-
-	const onEditExpense = (expense) => {
+	const editExpense = (id, title) => {
+		const expense = state.expenses.filter(item => item._id == id)[0];
 		setExpense(expense);
-		openModalForm();
+		openModalForm(title);
+	};
+
+	const openModalForm = (title) => {
+		if (title) setTitle(title);
+		else setTitle('Add Expense');
+		setModalVisible(true);
 	};
 
 	const hideModal = () => {
@@ -121,10 +133,10 @@ const ExpensesScreen = () => {
 				<>
 					<ExpenseListView 
 						expenses={state.expenses} 
+						onUpdate={togglePaid}
 						onDelete={deleteExpense} 
-						onExpand={toggleExpanded}
+						onViewDetails={editExpense}
 					/>
-
 					<Provider>
 						<Portal>
 							<Modal
@@ -134,7 +146,7 @@ const ExpensesScreen = () => {
 							>
 								<>
 									<Text style={styles.modalTextHeader}>
-										Add Expense
+										{formTitle}
 									</Text>
 									<Divider style={{ height: 2 }} />
 									{listState.isSaving ?
@@ -145,7 +157,7 @@ const ExpensesScreen = () => {
 							</Modal>
 						</Portal>
 					</Provider>
-					{ modalVisible || listState.accordionExpanded ? null :
+					{ modalVisible ? null :
 						<Button
 							buttonStyle={styles.actionButton}
 							raised
@@ -154,6 +166,7 @@ const ExpensesScreen = () => {
 								<ButtonIcon
 									name="md-add"
 									size={48}
+									position="center"
 								/>
 							}
 						/>
@@ -180,21 +193,22 @@ const styles = StyleSheet.create({
 		fontSize: Constants.fontMedium,
 	},
 	header: {
-		position: "absolute",
+		position: 'absolute',
 		top: 130,
 		fontSize: 30,
-		alignSelf: "center",
+		alignSelf: 'center',
 		color: '#fff',
 		marginBottom: 20
 	},
 	actionButton: {
-		paddingLeft: 12,
-		width: 70,
-		height: 70,
-		justifyContent: 'flex-end',
 		position: 'absolute',
-		bottom: 16,
-		right: 16,
+		bottom: 8,
+		display: 'flex',
+		alignSelf: 'center',
+		justifyContent: 'center',
+		paddingLeft: 10,
+		width: 64,
+		height: 64,
 		borderRadius: 100,
 		backgroundColor: Constants.secondaryColor
 	},

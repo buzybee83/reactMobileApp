@@ -1,9 +1,8 @@
 import React, { useEffect, useContext } from 'react';
 import { StyleSheet, Text, KeyboardAvoidingView, Platform } from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, StackActions } from '@react-navigation/native';
 import { Card } from 'react-native-elements';
 import { useHeaderHeight } from '@react-navigation/stack';
-
 import { Constants, DarkTheme } from '../constants/Theme';
 import { Context as AuthContext } from '../context/AuthContext';
 import AuthForm from '../components/AuthForm';
@@ -17,23 +16,24 @@ const LoginScreen = ({ navigation }) => {
 
     useFocusEffect(
         React.useCallback(() => {
-            return () => {
-                clearErrorMessage();
-            };
+            if (state.errorMessage) clearErrorMessage();
         }, [])
     );
+    
     useEffect(() => {
-        if (state.homeScreen) {
-            navigation.navigate({name: state.homeScreen});
+        if (state.errorMessage) clearErrorMessage();
+        if (state.route && state.route !== 'Auth') {
+            navigation.dispatch(
+                StackActions.replace('Main', {screen: state.route})
+            );
         }
-        
-    }, [state.homeScreen]);
+    }, [state.route]);
 
     return (
         <KeyboardAvoidingView 
             style={styles.container} 
             contentContainerStyle={{flex: 1}}
-            keyboardVerticalOffset={-headerHeight - 25}
+            keyboardVerticalOffset={-headerHeight - 132}
             behavior={Platform.OS == 'ios'? "padding" : "height"}>
             <WaveShape style={{ position: "absolute" , bottom: 0, zIndex: 1 }} opacity="0.55" path="pathTop" view="-1 1 350 750" fill="#9966ff" />
             <Text style={styles.header}> WELCOME </Text>
@@ -56,7 +56,7 @@ const styles = StyleSheet.create({
         flex: 1,
         alignContent: 'center',
         justifyContent: 'center',
-        backgroundColor: DarkTheme.darkBackground
+        ...DarkTheme
     },
     header: {
         position: "absolute",

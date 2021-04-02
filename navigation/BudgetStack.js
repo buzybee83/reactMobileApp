@@ -5,14 +5,14 @@ import MonthDetailScreen from '../screens/MonthDetailScreen';
 
 const Stack = createStackNavigator();
 
-function BudgetStack({ navigation, route }) {
+function BudgetStack() {
     return (
         <Stack.Navigator>
             <Stack.Screen
                 name="Budget"
                 component={HomeScreen}
                 options={{
-                    headerTitle: getHeaderTitle(route)
+                    headerTitle: 'Month Overview'
                 }}
             />
             <Stack.Screen
@@ -20,22 +20,11 @@ function BudgetStack({ navigation, route }) {
                 component={MonthDetailScreen}
                 options={{
                     headerBackTitle: '',
-                    headerTitle: getHeaderTitle(route)
+                    headerTitle: ''
                 }}
             />
         </Stack.Navigator>
     );
-}
-
-function getHeaderTitle(route) {
-    const headerTitle = route.state?.routes[route.state.index]?.params?.headerTitle;
-    const routeName = route.state?.routes[route.state.index]?.name ?? 'Budget';
-    switch (routeName) {
-        case 'MonthDetails':
-            return `${headerTitle} Details`;
-        case 'Budget':
-            return "Budget Overview"
-    }
 }
 
 export { BudgetStack }

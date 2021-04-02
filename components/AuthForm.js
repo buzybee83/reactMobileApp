@@ -1,15 +1,18 @@
 import React, { useState } from 'react';
-import { Text, Input, Button } from 'react-native-elements';
+import { View, TouchableWithoutFeedback, Keyboard } from 'react-native';
+import { Text, TextInput, Button, ActivityIndicator } from 'react-native-paper';
 import { useFocusEffect } from '@react-navigation/native';
 import { InputIcon } from '../components/Icons';
 import { Constants } from '../constants/Theme';
 import Spacer from '../components/Spacer';
+import { State } from 'react-native-gesture-handler';
 
 function AuthForm({ type, headerText, errorMessage, submitButtonText, onSubmit }) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
+    const [isLoading, setLoading] = useState(false);
 
     useFocusEffect(
         React.useCallback(() => {
@@ -18,92 +21,121 @@ function AuthForm({ type, headerText, errorMessage, submitButtonText, onSubmit }
                 setPassword('');
                 setFirstName('');
                 setLastName('');
+                setLoading(false);
             };
         }, [])
     );
 
+    const submitForm = async () => {
+        setLoading(true);
+        if (type == 'Signup') {
+            await onSubmit({ firstName, lastName, email, password });
+        } else {
+            await onSubmit({ email, password });
+        }
+    }
+
+    if (errorMessage) setLoading(false);
+
     return (
-        <>
-            <Text h4 style={{ textAlign: "center" }}>{headerText}</Text>
-            <Spacer size={8} />
-            {type == 'Signup' &&
-                <>
-                    <Input
-                        leftIcon={
-                            <InputIcon
-                                class="leftIcon"
-                                name="md-person"
-                                size={24}
-                            />
-                        }
-                        placeholder="First Name"
-                        value={firstName}
-                        onChangeText={setFirstName}
-                        autoCorrect={false}
-                    />
-                    <Spacer size={2} />
-                    <Input
-                        leftIcon={
-                            <InputIcon
-                                class="leftIcon"
-                                name="md-person"
-                                size={24}
-                            />
-                        }
-                        placeholder="Last Name"
-                        value={lastName}
-                        onChangeText={setLastName}
-                        autoCorrect={false}
-                    />
-                    <Spacer size={2} />
-                </>
-            }
-            <Input
-                leftIcon={
-                    <InputIcon
-                        class="leftIcon"
-                        name="md-mail"
-                        size={23}
-                    />
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+            <View>
+                <Text h4 style={{ textAlign: "center" }}>{headerText}</Text>
+                <Spacer size={8} />
+                {type == 'Signup' &&
+                    <>
+                        <TextInput
+                            label="First Name"
+                            leftIcon={
+                                <InputIcon
+                                    class="leftIcon"
+                                    name="md-person"
+                                    size={24}
+                                />
+                            }
+                            mode="outlined"
+                            value={firstName}
+                            onChangeText={setFirstName}
+                            autoCorrect={false}
+                        />
+                        <Spacer size={2} />
+                        <TextInput
+                            label="Last Name"
+                            leftIcon={
+                                <InputIcon
+                                    class="leftIcon"
+                                    name="md-person"
+                                    size={24}
+                                />
+                            }
+                            mode="outlined"
+                            value={lastName}
+                            onChangeText={setLastName}
+                            autoCorrect={false}
+                        />
+                        <Spacer size={2} />
+                    </>
                 }
-                placeholder="sample@domain.com"
-                value={email}
-                onChangeText={setEmail}
-                autoCompleteType="email"
-                autoCapitalize="none"
-                keyboardType="email-address"
-                autoCorrect={false}
-            />
-            <Spacer size={7} />
-            <Input
-                leftIcon={
-                    <InputIcon
-                        class="leftIcon"
-                        name="md-lock-closed"
-                        size={23}
-                    />
+                <TextInput
+                    label="Email"
+                    leftIcon={
+                        <InputIcon
+                            class="leftIcon"
+                            name="md-mail"
+                            size={23}
+                        />
+                    }
+                    mode="outlined"
+                    placeholder="sample@domain.com"
+                    value={email}
+                    onChangeText={setEmail}
+                    autoCompleteType="email"
+                    autoCapitalize="none"
+                    keyboardType="email-address"
+                    autoCorrect={false}
+                />
+                <Spacer size={7} />
+                <TextInput
+                    label="Password"
+                    leftIcon={
+                        <InputIcon
+                            class="leftIcon"
+                            name="md-lock-closed"
+                            size={23}
+                        />
+                    }
+                    mode="outlined"
+                    value={password}
+                    onChangeText={setPassword}
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    clearTextOnFocus={type !== 'Signup'}
+                    secureTextEntry
+                />
+                <Spacer size={1} />
+                <Text style={{ color: Constants.errorText }}>{errorMessage}</Text>
+                <Spacer size={8} />
+                { isLoading ? 
+                    <Button
+                        style={Constants.buttonDesign}
+                        mode="contained"
+                        color="white"
+                    >
+                        <ActivityIndicator animating={true} color="white" /> 
+                    </Button> 
+                    :
+                    <Button
+                        style={Constants.buttonDesign}
+                        mode="contained"
+                        color="white"
+                        onPress={submitForm}      
+                    >
+                        <Text style={Constants.buttonTextLarge}>{submitButtonText}</Text>
+                    </Button>
                 }
-                placeholder="Password"
-                value={password}
-                onChangeText={setPassword}
-                autoCapitalize="none"
-                autoCorrect={false}
-                clearTextOnFocus={type != 'Signup'}
-                secureTextEntry
-            />
-            <Spacer size={1} />
-            <Text style={{ color: Constants.errorText }}>{errorMessage}</Text>
-            <Spacer size={8} />
-            <Button
-                buttonStyle={Constants.buttonDesign}
-                titleStyle={Constants.buttonTextLarge}
-                title={submitButtonText}
-                onPress={() =>
-                    type == 'Signup' ?
-                        onSubmit({ firstName, lastName, email, password }) :
-                        onSubmit({ email, password })}
-            />
-        </>
+                
+            </View>
+        </TouchableWithoutFeedback>
     );
 }
 

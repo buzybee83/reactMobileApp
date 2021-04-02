@@ -4,7 +4,7 @@ import { Provider as PaperProvider } from 'react-native-paper';
 import { Platform, StatusBar } from 'react-native';
 import * as SplashScreen from 'expo-splash-screen';
 import * as Font from 'expo-font';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { NavigationContainer } from '@react-navigation/native';
 import { setTopNavigator } from './services/navigationServices';
 
@@ -14,7 +14,6 @@ import useLinking from './navigation/useLinking';
 const App = ({ navigation, ...props }) => {
 	const [barTheme, setBarTheme] = React.useState('light-content')
 	const [isLoadingComplete, setLoadingComplete] = React.useState(false);
-	const containerRef = React.useRef();
 	// Load any resources or data that we need prior to rendering the app
 	const loadResourcesAndDataAsync = React.useCallback(async () => {
 		try {
@@ -22,6 +21,7 @@ const App = ({ navigation, ...props }) => {
 			// Load fonts
 			await Font.loadAsync({
 				...Ionicons.font,
+				...MaterialIcons.fonts,
 				'roboto-light': require('./assets/fonts/Roboto-Light.ttf'),
 				'roboto-light-i': require('./assets/fonts/Roboto-LightItalic.ttf'),
 				'roboto': require('./assets/fonts/Roboto-Regular.ttf'),
