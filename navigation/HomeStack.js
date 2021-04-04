@@ -9,6 +9,7 @@ import { TabBarIcon } from '../components/Icons';
 // import { BudgetStack } from './BudgetStack';
 // import { ExpenseStack } from './ExpenseStack';
 import HomeScreen from '../screens/HomeScreen';
+import IncomeScreen from '../screens/IncomeScreen';
 import ExpensesScreen from '../screens/ExpensesScreen';
 import AccountScreen from '../screens/AccountScreen';
 import { Constants } from '../constants/Theme';
@@ -31,6 +32,13 @@ const HomeTabs = () => {
 				component={HomeScreen}
 				options={{
 					tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name="home" />,
+				}}
+			/>
+			<BottomTab.Screen
+				name="Income"
+				component={IncomeScreen}
+				options={{
+					tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name="attach-money" />,
 				}}
 			/>
 			<BottomTab.Screen
@@ -75,6 +83,8 @@ function getHeaderTitle(route) {
 	switch (routeName) {
 		case 'Home':
 			return 'Month Overview';
+		case 'Income':
+			return 'Monthly Income';
 		case 'Expenses':
 			return 'Monthly Expenses';
 		case 'Account':
