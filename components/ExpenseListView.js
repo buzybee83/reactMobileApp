@@ -81,13 +81,10 @@ const ExpenseListView = ({ expenses, onUpdate, onDelete, onViewDetails }) => {
 		onViewDetails(rowKey, 'Expense Details');
 	}
 
-	const onRowDidOpen = rowKey => {
-		console.log('This row opened', rowKey);
-	};
-
-	const renderItem = ({ item }) => (
+	const renderItem = ({ item }, rowMap) => (
 		<TouchableHighlight
-			onPress={() => console.log('You touched me')}
+			underlayColor={Constants.tintColorLight}
+			onPress={() => closeRow(rowMap, item._id)}
 			style={styles.rowContainer}
 		>
 			<View style={styles.rowContent}>
@@ -168,7 +165,6 @@ const ExpenseListView = ({ expenses, onUpdate, onDelete, onViewDetails }) => {
 					previewRowKey={'0'}
 					previewOpenValue={-40}
 					previewOpenDelay={3500}
-					onRowDidOpen={onRowDidOpen}
 				/>
 			</View>
 		);
@@ -190,8 +186,8 @@ const styles = StyleSheet.create({
 		alignSelf: 'center',
 		flexDirection: "column",
 		width: (WINDOW_WIDTH - 1),
-		height: '20%',
-		marginTop: 2,
+		height: '100%',
+		marginTop: 1,
 		paddingTop: 24
 	},
 	noItemsText: {
@@ -209,7 +205,7 @@ const styles = StyleSheet.create({
 	},
 	container: {
 		backgroundColor: 'white',
-		marginTop: 2
+		marginTop: 1
 	},
 	rowContainer: {
 		backgroundColor: 'white',

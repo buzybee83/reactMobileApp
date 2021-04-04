@@ -21,6 +21,7 @@ const Constants = {
   warnColor,
   linksColor,
   successColor: secondaryColor,
+  tintColorLight: '#dec7ff',
   errorBackground: 'red',
   errorText: '#bb0000',
   warningBackground: '#EAEB5E',

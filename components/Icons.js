@@ -1,12 +1,12 @@
 import * as React from 'react';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { StyleSheet } from 'react-native';
 
 import { Constants } from '../constants/Theme';
 
 const TabBarIcon = (props) => {
 	return (
-		<Ionicons
+		<MaterialIcons
 			name={props.name}
 			size={30}
 			style={{ marginBottom: -3 }}

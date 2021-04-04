@@ -80,14 +80,18 @@ const FieldTemplate = ({ item, action, childIndex }) => {
 						style={styles.picker}
 						itemStyle={styles.pickerItem}
 						testID={item.field}
-						selectedValue={item.value? item.value.toString() : item.value}
+						selectedValue={item.value}
 						onValueChange={(itemValue) => {
 							item.value = itemValue;
-							if (childIndex !== undefined) action(parseInt(itemValue), childIndex);
-							else action(parseInt(itemValue));
+							if (childIndex !== undefined) action(itemValue, childIndex);
+							else action(itemValue);
 						}}
 					>
 						{
+							Array.isArray(item.options) ? 
+							item.options.map(option => {
+								return <Picker.Item key={option} label={option} value={option} />;
+							}) :
 							Object.keys(item.options).map((key) => {
 								return <Picker.Item key={key} label={item.options[key]} value={key} />;
 							})

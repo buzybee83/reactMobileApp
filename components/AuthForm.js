@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { Text, TextInput, Button, ActivityIndicator } from 'react-native-paper';
 import { useFocusEffect } from '@react-navigation/native';
@@ -26,6 +26,10 @@ function AuthForm({ type, headerText, errorMessage, submitButtonText, onSubmit }
         }, [])
     );
 
+    useEffect(()=> {
+        setLoading(false);
+    },[errorMessage])
+
     const submitForm = async () => {
         setLoading(true);
         if (type == 'Signup') {
@@ -34,8 +38,6 @@ function AuthForm({ type, headerText, errorMessage, submitButtonText, onSubmit }
             await onSubmit({ email, password });
         }
     }
-
-    if (errorMessage) setLoading(false);
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
@@ -115,24 +117,19 @@ function AuthForm({ type, headerText, errorMessage, submitButtonText, onSubmit }
                 <Spacer size={1} />
                 <Text style={{ color: Constants.errorText }}>{errorMessage}</Text>
                 <Spacer size={8} />
-                { isLoading ? 
+               
                     <Button
                         style={Constants.buttonDesign}
                         mode="contained"
                         color="white"
+                        onPress={() => !isLoading && submitForm()}      
                     >
-                        <ActivityIndicator animating={true} color="white" /> 
-                    </Button> 
-                    :
-                    <Button
-                        style={Constants.buttonDesign}
-                        mode="contained"
-                        color="white"
-                        onPress={submitForm}      
-                    >
-                        <Text style={Constants.buttonTextLarge}>{submitButtonText}</Text>
+                        { isLoading ? 
+                            <ActivityIndicator animating={true} color="white" /> :
+                            <Text style={Constants.buttonTextLarge}>{submitButtonText}</Text>
+                        }
                     </Button>
-                }
+                
                 
             </View>
         </TouchableWithoutFeedback>

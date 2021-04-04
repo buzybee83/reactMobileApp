@@ -2,15 +2,18 @@ import React, { useEffect, useContext, useState } from 'react';
 import {
 	SafeAreaView,
 	Text,
+	View,
 	StyleSheet,
+	Modal
 } from 'react-native';
 import {
 	ActivityIndicator,
 	Divider,
-	Provider,
-	Portal,
-	Modal
+	// Provider,
+	// Portal,
+	// Modal
 } from 'react-native-paper';
+// import Modal from 'react-native-modal';
 import { Button } from 'react-native-elements';
 import { Constants, DarkTheme } from '../constants/Theme';
 import { Context as ExpenseContext } from '../context/ExpenseContext';
@@ -18,6 +21,7 @@ import { Context as BudgetContext } from '../context/BudgetContext';
 import { ButtonIcon } from '../components/Icons';
 import ExpenseListView from '../components/ExpenseListView';
 import ExpenseForm from '../components/ExpenseForm';
+import { MaterialIcons } from '@expo/vector-icons';
 
 const ExpensesScreen = () => {
 	const {
@@ -35,7 +39,7 @@ const ExpensesScreen = () => {
 
 	const refreshExpenseData = React.useCallback(async () => {
 		await fetchExpenses();
-		console.log('===DONE REFRESHING===')
+		console.log('===EXPENSES DONE REFRESHING===')
 	});
 
 	useEffect(() => {
@@ -56,7 +60,7 @@ const ExpensesScreen = () => {
 			updatedItem.isPaid = !updatedItem.isPaid;
 			await updateExpenseById(updatedItem);
 		} catch (err) {
-			console.warn('ERROR OCCURED IN SAVING EXPENSE ==', err)
+			console.warn('ERROR OCCURED IN SAVING EXPENSE - ', err)
 		} finally {
 			setListState({ ...listState, isSaving: false });
 		}
@@ -91,7 +95,7 @@ const ExpensesScreen = () => {
 				await createExpense(newExpense);
 			}
 		} catch (err) {
-			console.warn('ERROR OCCURED IN SAVING EXPENSE ==', err)
+			console.warn('ERROR OCCURED IN SAVING EXPENSE - ', err)
 		} finally {
 			hideModal();
 			setListState({ ...listState, isSaving: false });
@@ -132,32 +136,37 @@ const ExpensesScreen = () => {
 			{listState.isLoading ? 
 				<ActivityIndicator animating={true} style={{ paddingVertical: 45 }} color={Constants.primaryColor}/> :
 				<>
-					<ExpenseListView 
-						expenses={state.expenses} 
-						onUpdate={togglePaid}
-						onDelete={deleteExpense} 
-						onViewDetails={editExpense}
-					/>
-					<Provider>
-						<Portal>
-							<Modal
-								visible={modalVisible}
-								contentContainerStyle={styles.modalView}
-								onDismiss={hideModal}
-							>
-								<>
-									<Text style={styles.modalTextHeader}>
-										{ formTitle }
-									</Text>
-									<Divider style={{ height: 2 }} />
-									{listState.isSaving ?
-										<ActivityIndicator animating={true} style={{ paddingVertical: 30 }} /> :
-										<ExpenseForm onSubmitForm={onSubmitExpense} expense={expense} onDelete={deleteExpense} />
-									}
-								</>
-							</Modal>
-						</Portal>
-					</Provider>
+					<View>
+						<ExpenseListView 
+							expenses={state.expenses} 
+							onUpdate={togglePaid}
+							onDelete={deleteExpense} 
+							onViewDetails={editExpense}
+						/>
+					</View>
+					<Modal
+						visible={modalVisible}
+						animationType="slide"
+						presentationStyle="formSheet"
+						onRequestClose={hideModal}
+					>
+						<View style={styles.modalView}>
+							<Text style={styles.modalTextHeader}>
+								{formTitle}
+							</Text>
+							<MaterialIcons 
+								style={{position: 'absolute', right: 8, top: -8}} 
+								name="close" 
+								size={28} 
+								onPress={hideModal}
+							/>
+							<Divider style={{ height: 2 }} />
+							{listState.isSaving ?
+								<ActivityIndicator animating={true} style={{ paddingVertical: 30 }} /> :
+								<ExpenseForm onSubmitForm={onSubmitExpense} expense={expense} onDelete={deleteExpense} />
+							}
+						</View>
+					</Modal>
 					{ modalVisible ? null :
 						<Button
 							buttonStyle={styles.actionButton}
@@ -168,6 +177,7 @@ const ExpensesScreen = () => {
 									name="md-add"
 									size={48}
 									position="center"
+									color="white"
 								/>
 							}
 						/>
@@ -181,24 +191,26 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 		alignContent: 'stretch',
-		justifyContent: 'center',
+		justifyContent: 'space-between',
 		...DarkTheme
 	},
 	actionButton: {
+		display: 'flex',
 		position: 'absolute',
 		bottom: 8,
-		display: 'flex',
 		alignSelf: 'center',
 		justifyContent: 'center',
 		paddingLeft: 10,
 		width: 64,
 		height: 64,
 		borderRadius: 100,
-		backgroundColor: Constants.secondaryColor
+		backgroundColor: Constants.warnColor
 	},
 	modalView: {
+		flex: 1,
 		backgroundColor: 'white',
-		padding: 20
+		marginTop: 20,
+		paddingHorizontal: 24
 	},
 	modalTextHeader: {
 		fontSize: Constants.fontLarge,

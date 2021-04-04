@@ -1,4 +1,5 @@
 import React from 'react';
+import { StatusBar } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 // import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
@@ -17,6 +18,7 @@ const INITIAL_ROUTE_NAME = 'Home';
 const Stack = createStackNavigator();
 
 const HomeTabs = () => {
+	StatusBar.setBarStyle('dark-content');
 	return (
 		<BottomTab.Navigator
 			initialRouteName={INITIAL_ROUTE_NAME}
@@ -28,21 +30,21 @@ const HomeTabs = () => {
 				name="Home"
 				component={HomeScreen}
 				options={{
-					tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name="md-home" />,
+					tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name="home" />,
 				}}
 			/>
 			<BottomTab.Screen
 				name="Expenses"
 				component={ExpensesScreen}
 				options={{
-					tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name="md-medkit" />,
+					tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name="credit-card" />,
 				}}
 			/>
 			<BottomTab.Screen
 				name="Account"
 				component={AccountScreen}
 				options={{
-					tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name="md-settings" />,
+					tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name="settings" />,
 				}}
 			/>
 		</BottomTab.Navigator>

@@ -1,10 +1,5 @@
 
-const PayFrequency = {
-  1: 'Weekly',
-  2: 'Bi-Weekly',
-  3: 'Semi-Monthly',
-  4: 'Monthly'
-};
+const PayFrequency = ['Weekly', 'Bi-Weekly', 'Semi-Monthly', 'Monthly'];
 
 // const EmploymentType = {
 //   1: 'Hourly',
@@ -32,7 +27,7 @@ const Income = [{
   field: 'payFrequency',
   label: 'Pay Frequency',
   type: 'select',
-  default: 2,
+  default: 'Bi-Weekly',
   options: PayFrequency
 }, {
 //   section: 'Set Your Income Type',
