@@ -4,94 +4,88 @@ import {
 	Text,
 	View,
 	StyleSheet,
-	Modal
+	Modal,
+	Alert
 } from 'react-native';
 import {
 	ActivityIndicator,
 	Divider,
 } from 'react-native-paper';
-// import Modal from 'react-native-modal';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Button } from 'react-native-elements';
 import { Constants, DarkTheme } from '../constants/Theme';
-import { Context as ExpenseContext } from '../context/ExpenseContext';
+import { Context as IncomeContext } from '../context/IncomeContext';
 import { Context as BudgetContext } from '../context/BudgetContext';
 import { ButtonIcon } from '../components/Icons';
-import ExpenseListView from '../components/ExpenseListView';
-import ExpenseForm from '../components/ExpenseForm';
+import IncomeListView from '../components/IncomeListView';
+import IncomeForm from '../components/IncomeForm';
 import TotalAmount from '../components/TotalAmount';
 
-
-const ExpensesScreen = () => {
+const IncomeScreen = () => {
 	const {
 		state,
-		fetchExpenses,
-		createExpense,
-		updateExpenseById,
-		deleteExpenseById
-	} = useContext(ExpenseContext);
+		fetchIncome,
+		createIncome,
+		updateIncomeById,
+		deleteIncomeById
+	} = useContext(IncomeContext);
 	const { state: { budget } } = useContext(BudgetContext);
-	const [expense, setExpense] = useState(null);
+	const [income, setIncome] = useState(null);
 	const [formTitle, setTitle] = useState('');
+	const [isActionRequired, setActionRequired] = useState(false);
 	const [listState, setListState] = useState({ isLoading: true, isSaving: false });
 	const [modalVisible, setModalVisible] = useState(false);
 
-	const refreshExpenseData = React.useCallback(async () => {
-		await fetchExpenses();
-		console.log('===EXPENSES DONE REFRESHING===')
+	const refreshIncomeData = React.useCallback(async () => {
+		await fetchIncome();
+		console.log('===INCOME DONE REFRESHING===')
 	});
 
 	useEffect(() => {
 		setListState({ ...listState, isLoading: true });
 		try {
-			refreshExpenseData();
-		} catch(err) {
-			console.warn(`Error loading Expenses. ${err}`)
+			refreshIncomeData();
+		} catch (err) {
+			console.warn(`Error loading Income. ${err}`)
 		} finally {
 			setListState({ ...listState, isLoading: false });
 		}
 	}, [!listState.isSaving]);
 
-	const togglePaid =  async (id) => {
-		setListState({ ...listState, isSaving: true });
-		const updatedItem = state.expenses.filter(item => item._id === id)[0];
-		try {
-			updatedItem.isPaid = !updatedItem.isPaid;
-			await updateExpenseById(updatedItem);
-		} catch (err) {
-			console.warn('ERROR OCCURED IN SAVING EXPENSE - ', err)
-		} finally {
-			setListState({ ...listState, isSaving: false });
-		}
+	const actionRequired = (id) => {
+		Alert.alert(
+			"Warning",
+			"This is part of your recurring monthly income. Do you want to delete this income from the rest of the months?",
+			[
+				{
+					text: "Yes",
+					onPress: () => deleteIncome(id),
+					style: 'destructive'
+				},
+				{
+					text: "No",
+					onPress: () => deleteFromMonth(id),
+					style: "default"
+				}
+			]
+		);
 	};
 
-	const onSubmitExpense = async (data, expenseRef) => {
+	const onSubmitIncome = async (data, incomeRef) => {
 		setListState({ ...listState, isSaving: true });
 
 		try {
-			if (expenseRef && expenseRef._id) {
-				expenseRef = {
-					...expenseRef,
+			if (incomeRef && incomeRef._id) {
+				incomeRef = {
+					...incomeRef,
 					...data
 				};
-				expenseRef.amount = parseFloat(data.amount).toFixed(2);
-				expenseRef.frequency.isRecurring = data.isRecurring;
-				expenseRef.frequency.recurringType = data.recurringType;
-				console.log('expenseRef ==', expenseRef)
-				await updateExpenseById(expenseRef);
+				incomeRef.amount = parseFloat(data.amount).toFixed(2);
+				await updateIncomeById(incomeRef);
 
 			} else {
-				const newExpense = {
-					budgetId: budget._id,
-					...data,
-
-					frequency: {
-						isRecurring: data.isRecurring,
-						recurringType: data.recurringType
-					}
-				};
-				newExpense.amount = parseFloat(data.amount).toFixed(2);
-				await createExpense(newExpense);
+				data.amount = parseFloat(data.amount).toFixed(2);
+				await createIncome(data);
 			}
 		} catch (err) {
 			console.warn('ERROR OCCURED IN SAVING EXPENSE - ', err)
@@ -101,9 +95,25 @@ const ExpensesScreen = () => {
 		}
 	};
 
-	const deleteExpense = async (id) => {
+	const canDelete = (id) => {
+		const itemToDelete = state.income.filter(x => x._id == id)[0];
+		if (itemToDelete.isAutomated && itemToDelete.incomeType) return false;
+
+		return true;
+	}
+
+	const onDelete = (id) => {
+		if (canDelete(id)) {
+			deleteIncome(id)
+		} else {
+			actionRequired(id);
+		}
+	};
+
+	const deleteIncome = async (id) => {
 		try {
-			await deleteExpenseById(id);
+			// TODO: take out income reference from all months as well
+			await deleteIncomeById(id);
 		} catch (err) {
 			console.warn(err);
 		} finally {
@@ -113,59 +123,68 @@ const ExpensesScreen = () => {
 		}
 	};
 
-	const editExpense = (id, title) => {
-		const expense = state.expenses.filter(item => item._id == id)[0];
-		setExpense(expense);
+	const deleteFromMonth = (id) => {
+		// TODO: take out income reference from current month only
+	}
+
+	const editIncome = (id, title) => {
+		const item = state.income.filter(item => item._id == id)[0];
+		setIncome(item);
 		openModalForm(null, title);
 	};
 
 	const openModalForm = (ev, title) => {
 		if (title) setTitle(title);
-		else setTitle('Add Expense');
+		else setTitle('Add Income');
 		setModalVisible(true);
 	};
 
 	const hideModal = () => {
-		setExpense(null);
+		setIncome(null);
 		setModalVisible(false);
 	};
 
 	return (
 		<SafeAreaView style={styles.container}>
-			{listState.isLoading ? 
-				<ActivityIndicator animating={true} style={{ paddingVertical: 45 }} color={Constants.primaryColor}/> :
+			{listState.isLoading ?
+				<ActivityIndicator animating={true} style={{ paddingVertical: 45 }} color={Constants.primaryColor} /> :
 				<>
-					<View style={{flex: 1, justifyContent: 'center'}}>
-                        <TotalAmount items={state.expenses} paramKey="amount" color={Constants.warnColor}></TotalAmount>
-                    </View>
-					<View style={{flex: 8}}>
-						<ExpenseListView 
-							expenses={state.expenses} 
-							onUpdate={togglePaid}
-							onDelete={deleteExpense} 
-							onViewDetails={editExpense}
+					<View style={{ flex: 1, justifyContent: 'center' }}>
+						<TotalAmount items={state.income} paramKey="amount" color={Constants.successColor} />
+					</View>
+					<View style={{ flex: 8 }}>
+						<IncomeListView
+							income={state.income}
+							onDelete={onDelete}
+							onViewDetails={editIncome}
+							showPreview={budget.settings.showPreview}
 						/>
 					</View>
 					<Modal
 						visible={modalVisible}
 						animationType="slide"
-						presentationStyle="formSheet"
+						presentationStyle="pageSheet"
 						onRequestClose={hideModal}
 					>
 						<View style={styles.modalView}>
 							<Text style={styles.modalTextHeader}>
 								{formTitle}
 							</Text>
-							<MaterialIcons 
-								style={{position: 'absolute', right: 8, top: -8}} 
-								name="close" 
-								size={28} 
+							<MaterialIcons
+								style={{ position: 'absolute', right: 8, top: -8 }}
+								name="close"
+								size={28}
 								onPress={hideModal}
 							/>
 							<Divider style={{ height: 2 }} />
 							{listState.isSaving ?
 								<ActivityIndicator animating={true} style={{ paddingVertical: 30 }} /> :
-								<ExpenseForm onSubmitForm={onSubmitExpense} expense={expense} onDelete={deleteExpense} />
+								<IncomeForm
+									onSubmitForm={onSubmitIncome}
+									item={income}
+									onDelete={onDelete}
+									settings={budget.settings}
+								/>
 							}
 						</View>
 					</Modal>
@@ -179,7 +198,6 @@ const ExpensesScreen = () => {
 									name="md-add"
 									size={48}
 									position="center"
-									color="white"
 								/>
 							}
 						/>
@@ -206,7 +224,7 @@ const styles = StyleSheet.create({
 		width: 64,
 		height: 64,
 		borderRadius: 100,
-		backgroundColor: Constants.warnColor
+		backgroundColor: Constants.secondaryColor
 	},
 	modalView: {
 		flex: 1,
@@ -222,4 +240,4 @@ const styles = StyleSheet.create({
 	}
 });
 
-export default ExpensesScreen;
+export default IncomeScreen;

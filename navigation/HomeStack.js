@@ -6,9 +6,11 @@ import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
 import { TabBarIcon } from '../components/Icons';
-// import { BudgetStack } from './BudgetStack';
-// import { ExpenseStack } from './ExpenseStack';
+import { Provider as IncomeProvider } from '../context/IncomeContext';
+import { Provider as ExpenseProvider } from '../context/ExpenseContext';
+
 import HomeScreen from '../screens/HomeScreen';
+import IncomeScreen from '../screens/IncomeScreen';
 import ExpensesScreen from '../screens/ExpensesScreen';
 import AccountScreen from '../screens/AccountScreen';
 import { Constants } from '../constants/Theme';
@@ -34,6 +36,13 @@ const HomeTabs = () => {
 				}}
 			/>
 			<BottomTab.Screen
+				name="Income"
+				component={IncomeScreen}
+				options={{
+					tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name="attach-money" />,
+				}}
+			/>
+			<BottomTab.Screen
 				name="Expenses"
 				component={ExpensesScreen}
 				options={{
@@ -52,17 +61,20 @@ const HomeTabs = () => {
 }
 
 export default function HomeStack({ navigation }) {
-	// navigation.setOptions({ statusBarStyle: 'dark-content' });
 	return (
-		<Stack.Navigator>
-			<Stack.Screen
-				name="Home"
-				component={HomeTabs}
-				options={({ route }) => ({
-					headerTitle: getHeaderTitle(route),
-				})}
-			/>
-		</Stack.Navigator>
+		<IncomeProvider>
+			<ExpenseProvider>
+				<Stack.Navigator>
+					<Stack.Screen
+						name="Home"
+						component={HomeTabs}
+						options={({ route }) => ({
+							headerTitle: getHeaderTitle(route),
+						})}
+					/>
+				</Stack.Navigator>
+			</ExpenseProvider>
+		</IncomeProvider>
 	);
 }
 
@@ -75,6 +87,8 @@ function getHeaderTitle(route) {
 	switch (routeName) {
 		case 'Home':
 			return 'Month Overview';
+		case 'Income':
+			return 'Monthly Income';
 		case 'Expenses':
 			return 'Monthly Expenses';
 		case 'Account':

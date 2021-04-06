@@ -8,46 +8,59 @@ import {
 	TouchableHighlight,
 } from 'react-native';
 import { ActivityIndicator,	Card } from 'react-native-paper';
-import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { MaterialIcons } from '@expo/vector-icons';
 import { SwipeListView } from 'react-native-swipe-list-view';
 import { Constants } from '../constants/Theme';
-import { nth } from '../services/utilHelper';
+import { nth, IncomeType } from '../services/utilHelper';
 
 const WINDOW_WIDTH = Dimensions.get('window').width;
 
-const ExpenseListView = ({ expenses, onUpdate, onDelete, onViewDetails }) => {
+const IncomeListView = ({ income, onDelete, onViewDetails, showPreview }) => {
 	const [action, setAction] = useState('');
 	const [items, setItems] = useState('');
 	const [loading, setLoading] = useState(true);
-	
+	const [previewRow, setPreviewRow] = useState('0');
+
 	useEffect(() => {
-		if (expenses) {
-			setItems(expenses);
+		if (income) {
+			setItems(income);
 			setLoading(false);
+			if (showPreview) {
+				setPreviewRow(income[0]?._id);
+			} else {
+				setPreviewRow('0');
+			}
 		}
-	}, [expenses]);
+	}, [income]);
+
+	const getStatus = (day) => {
+		let today = new Date().getDate();
+		if (day > today) {
+			return 'Expected';
+		} else {
+			return 'Received';
+		}
+	}
 
 	const ContentTitle = ({ item }) => {
 		return (
 			<View style={styles.titleContainer}>
-				<Text style={styles.titleText}>{item.name}</Text>
-				<Text style={styles.titleText}>{item.amount.toLocaleString("en-US",{style: "currency", currency: "USD"})}</Text>
+				<Text style={styles.titleText}>{item.description}</Text>
+				<Text style={styles.titleText}>
+					{item.amount.toLocaleString("en-US",{style: "currency", currency: "USD"})}
+				</Text>
 			</View>
 		);
 	}
 
-	const ContentDescription = ({ day, isPaid, isRecurring }) => {
-		const textColor = isPaid ? { color: Constants.successColor, marginTop: -6 } : { color: Constants.errorText };
+	const ContentDescription = ({ day, incomeType }) => {
 		return (
 			<View style={styles.descriptionContainer}>
-				<Text style={[styles.infoText, textColor]}>{isPaid ?
-					<MaterialIcons
-						size={28}
-						name="check"
-					/> : 'Not Paid'}
+				<Text style={styles.infoText}>
+					{IncomeType[incomeType]}
 				</Text>
 				<Text style={styles.infoText}>
-					{`${!isRecurring ? 'One-Time ' : ''}Due: ${new Date().toLocaleString('default', { month: 'long' })} ${day}${nth(day)}`}
+					{`${getStatus(day)} ${new Date().toLocaleString('default', { month: 'long' })} ${day}${nth(day)}`}
 				</Text>
 			</View>
 		)
@@ -59,13 +72,6 @@ const ExpenseListView = ({ expenses, onUpdate, onDelete, onViewDetails }) => {
 		}
 	};
 
-	const toggleCheck = async (rowMap, rowKey) => {
-		setAction('update');
-		await onUpdate(rowKey);
-		setAction('');
-		closeRow(rowMap, rowKey);
-	};
-
 	const deleteRow = async (rowMap, rowKey) => {
 		setAction('delete');
 		await onDelete(rowKey);
@@ -75,7 +81,7 @@ const ExpenseListView = ({ expenses, onUpdate, onDelete, onViewDetails }) => {
 
 	const viewDetails = (rowMap, rowKey) => {
 		closeRow(rowMap, rowKey);
-		onViewDetails(rowKey, 'Expense Details');
+		onViewDetails(rowKey, 'Income Details');
 	}
 
 	const renderItem = ({ item }, rowMap) => (
@@ -87,15 +93,14 @@ const ExpenseListView = ({ expenses, onUpdate, onDelete, onViewDetails }) => {
 			<View style={styles.rowContent}>
 				<MaterialIcons
 					size={30}
-					style={{marginRight: 8}}
-					name="credit-card"
+					style={{marginRight: 6}}
+					name="attach-money"
 				/>
 				<View style={styles.rowContentItems}>
 					<ContentTitle item={item} />
 					<ContentDescription
-						day={item.dueDay}
-						isPaid={item.isPaid}
-						isRecurring={item.frequency.isRecurring}
+						day={item.payday}
+						incomeType={item.incomeType}
 					/>
 				</View>
 			</View>
@@ -104,21 +109,7 @@ const ExpenseListView = ({ expenses, onUpdate, onDelete, onViewDetails }) => {
 
 	const renderHiddenItem = (data, rowMap) => (
 		<View style={styles.rowBack}>
-			<TouchableOpacity
-				style={styles.backLeftBtn}
-				onPress={() => toggleCheck(rowMap, data.item._id)}
-			>
-				{action == 'update' ?
-					<ActivityIndicator animating={true} color={Constants.primaryColor} /> :
-					<>
-						<MaterialIcons
-							size={28}
-							name={data.item.isPaid ? 'close' : 'check'}
-						/>
-						<Text style={{ paddingTop: 8 }}>{data.item.isPaid ? 'Not Paid' : 'Paid'}</Text>
-					</>
-				}
-			</TouchableOpacity>
+			
 			<TouchableOpacity
 				style={[styles.backRightBtn, styles.backRightBtnLeft]}
 				onPress={() => deleteRow(rowMap, data.item._id)}
@@ -153,13 +144,13 @@ const ExpenseListView = ({ expenses, onUpdate, onDelete, onViewDetails }) => {
 		return (
 			<View style={styles.container}>
 				<SwipeListView
-					data={expenses}
+					data={income}
 					keyExtractor={itemToId}
 					renderItem={renderItem}
 					renderHiddenItem={renderHiddenItem}
-					leftOpenValue={95}
+					disableRightSwipe={true}
 					rightOpenValue={-150}
-					previewRowKey={expenses[0]._id}
+					previewRowKey={previewRow}
 					previewOpenValue={-40}
 					previewOpenDelay={2000}
 				/>
@@ -168,10 +159,10 @@ const ExpenseListView = ({ expenses, onUpdate, onDelete, onViewDetails }) => {
 	} else {
 		return (
 			<Card style={styles.noContentContainer}>
-				<Text style={styles.noItemsText}>No expenses found.</Text>
+				<Text style={styles.noItemsText}>No income found.</Text>
 				<View style={styles.helpTextContainer}>
 					<MaterialIcons name="info" size={34} color={Constants.primaryColor} />
-					<Text style={styles.helpText}>Start adding your monthly expenses here by pressing the [+] button bellow.</Text>
+					<Text style={styles.helpText}>Start adding your monthly income here by pressing the [+] button bellow.</Text>
 				</View>
 			</Card>
 		)
@@ -270,4 +261,4 @@ const styles = StyleSheet.create({
 	},
 });
 
-export default ExpenseListView;
+export default IncomeListView;
