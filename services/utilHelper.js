@@ -1,3 +1,5 @@
+const IncomeType = ['Misc/One time', 'Paycheck/Recurring'];
+
 const defaultMonthObject = {
     month: null,
     totalIncome: 0, //Number,
@@ -38,7 +40,19 @@ const checkActiveMonths = (data) => {
 
 const nth = n => ["st","nd","rd"][(((n<0?-n:n)+90)%100-10)%10-1]||"th";
 
+const constructDaysInMonth = () => {
+    const days = [];
+    let num = 1;
+    while (days.length < 31) {
+        days.push(num.toString());
+        num++;
+    }
+    return days;
+}
+
 export {
     checkActiveMonths,
-    nth
+    constructDaysInMonth,
+    IncomeType,
+    nth,
 }

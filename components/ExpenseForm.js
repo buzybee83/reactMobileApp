@@ -1,33 +1,24 @@
 import React, { useState } from 'react';
-import { View, ScrollView, StyleSheet, TouchableWithoutFeedback, Keyboard, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, TouchableWithoutFeedback, Keyboard, TouchableOpacity } from 'react-native';
 import { Picker } from '@react-native-community/picker'
 import { useForm, Controller } from "react-hook-form";
 import { Text } from 'react-native-elements';
 import { TextInput, Switch, Button } from 'react-native-paper';
 import { Constants } from '../constants/Theme';
 import Spacer from '../components/Spacer';
-
-const constructDaysInMonth = () => {
-    const days = [];
-    let num = 1;
-    while (days.length < 31) {
-        days.push(num.toString());
-        num++;
-    }
-    return days;
-}
+import { constructDaysInMonth, nth } from '../services/utilHelper';
 
 const ExpenseForm = ({ onSubmitForm, onDelete, expense }) => {
     const { control, handleSubmit, formState, errors, reset } = useForm({
         mode: 'onChange',
     });
-    const [canShowRecurringType, setCanShowRecurringType] = useState((expense._id ? expense.frequency.isRecurring : true));
+    const [canShowRecurringType, setCanShowRecurringType] = useState((expense ? expense.frequency.isRecurring : true));
     const daysInMonth = constructDaysInMonth();
-    const [expenseRef, setExpenseRef] = expense._id ? useState(expense) : useState({});
+    // const [expense, setexpense] = expense._id ? useState(expense) : useState({});
     const { isDirty, isSubmitted, isTouched, isValid, isValidating } = formState;
     const onSubmit = (data) => {
         if (isDirty && isValid) {
-            onSubmitForm(data, expenseRef);
+            onSubmitForm(data, expense);
         }
     };
     return (
@@ -48,7 +39,7 @@ const ExpenseForm = ({ onSubmitForm, onDelete, expense }) => {
                         )}
                         name="name"
                         rules={{ required: true }}
-                        defaultValue={expenseRef._id ? expenseRef.name : ""}
+                        defaultValue={expense ? expense.name : ""}
                     />
                     {errors.name && <Text style={styles.hasError}>This is required.</Text>}
                     {!errors.name && <Spacer size={1} />}
@@ -66,7 +57,7 @@ const ExpenseForm = ({ onSubmitForm, onDelete, expense }) => {
                         )}
                         rules={{ required: true, pattern: /^[0-9]+(\.\d{1,2})?$/ }}
                         name="amount"
-                        defaultValue={expenseRef.amount ? expenseRef.amount.toFixed(2).toString() : ""}
+                        defaultValue={expense ? expense.amount.toFixed(2).toString() : ""}
                     />
                     {errors.amount && errors.amount.type == 'required' &&
                         <Text style={styles.hasError}>This is required.</Text>
@@ -92,13 +83,19 @@ const ExpenseForm = ({ onSubmitForm, onDelete, expense }) => {
                                 >
                                     <Picker.Item label="Select day..." value="" />
                                     {Object.keys(daysInMonth).map((key) => {
-                                        return <Picker.Item key={key + 1} label={daysInMonth[key]} value={daysInMonth[key]} />;
+                                        return (
+                                            <Picker.Item 
+                                                key={key + 1} 
+                                                label={daysInMonth[key]+(nth(daysInMonth[key]))} 
+                                                value={daysInMonth[key]} 
+                                            />
+                                        )
                                     })}
                                 </Picker>
                             )}
                             rules={{ required: true }}
                             name="dueDay"
-                            defaultValue={expenseRef._id ? expenseRef.dueDay : ""}
+                            defaultValue={expense ? expense.dueDay : ""}
                         />
                     </View>
                     {errors.dueDay && <Text style={styles.hasError}>This is required.</Text>}
@@ -117,7 +114,7 @@ const ExpenseForm = ({ onSubmitForm, onDelete, expense }) => {
                                 />
                             )}
                             name="split"
-                            defaultValue={expenseRef._id ? expenseRef.split : false}
+                            defaultValue={expense ? expense.split : false}
                         />
                     </View>
                     <View style={[styles.fieldContainer, { paddingTop: 30 }]}>
@@ -138,7 +135,7 @@ const ExpenseForm = ({ onSubmitForm, onDelete, expense }) => {
                                 />
                             )}
                             name="isRecurring"
-                            defaultValue={expenseRef._id ? expenseRef.frequency.isRecurring : true}
+                            defaultValue={expense ? expense.frequency.isRecurring : true}
                         />
                     </View>
                     {canShowRecurringType &&
@@ -165,7 +162,7 @@ const ExpenseForm = ({ onSubmitForm, onDelete, expense }) => {
                                     </Picker>
                                 )}
                                 name="recurringType"
-                                defaultValue={expenseRef._id ? expenseRef.frequency.recurringType : "Once a Month"}
+                                defaultValue={expense ? expense.frequency.recurringType : "Once a Month"}
                             />
                         </View>
                     }
@@ -183,14 +180,14 @@ const ExpenseForm = ({ onSubmitForm, onDelete, expense }) => {
                         style={styles.primaryBtn}
                         onPress={handleSubmit(onSubmit)}
                     >
-                        {expense._id ? 'Update' : 'Save'}
+                        {expense ? 'Update' : 'Save'}
                     </Button>
-                    {onDelete && expense._id &&
+                    {onDelete && expense &&
                         <Button
                             style={{ marginTop: 6 }}
                             color={Constants.errorText}
                             mode="outlined"
-                            onPress={() => onDelete(expenseRef)}
+                            onPress={() => onDelete(expense._id)}
                             TouchableComponent={TouchableOpacity}
                         >
                             Delete

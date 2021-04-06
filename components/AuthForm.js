@@ -117,7 +117,6 @@ function AuthForm({ type, headerText, errorMessage, submitButtonText, onSubmit }
                 <Spacer size={1} />
                 <Text style={{ color: Constants.errorText }}>{errorMessage}</Text>
                 <Spacer size={8} />
-               
                     <Button
                         style={Constants.buttonDesign}
                         mode="contained"

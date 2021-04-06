@@ -9,11 +9,9 @@ import {
 import {
 	ActivityIndicator,
 	Divider,
-	// Provider,
-	// Portal,
-	// Modal
 } from 'react-native-paper';
 // import Modal from 'react-native-modal';
+import { MaterialIcons } from '@expo/vector-icons';
 import { Button } from 'react-native-elements';
 import { Constants, DarkTheme } from '../constants/Theme';
 import { Context as ExpenseContext } from '../context/ExpenseContext';
@@ -21,7 +19,8 @@ import { Context as BudgetContext } from '../context/BudgetContext';
 import { ButtonIcon } from '../components/Icons';
 import ExpenseListView from '../components/ExpenseListView';
 import ExpenseForm from '../components/ExpenseForm';
-import { MaterialIcons } from '@expo/vector-icons';
+import TotalAmount from '../components/TotalAmount';
+
 
 const ExpensesScreen = () => {
 	const {
@@ -32,7 +31,7 @@ const ExpensesScreen = () => {
 		deleteExpenseById
 	} = useContext(ExpenseContext);
 	const { state: { budget } } = useContext(BudgetContext);
-	const [expense, setExpense] = useState({});
+	const [expense, setExpense] = useState(null);
 	const [formTitle, setTitle] = useState('');
 	const [listState, setListState] = useState({ isLoading: true, isSaving: false });
 	const [modalVisible, setModalVisible] = useState(false);
@@ -127,7 +126,7 @@ const ExpensesScreen = () => {
 	};
 
 	const hideModal = () => {
-		setExpense({});
+		setExpense(null);
 		setModalVisible(false);
 	};
 
@@ -136,7 +135,10 @@ const ExpensesScreen = () => {
 			{listState.isLoading ? 
 				<ActivityIndicator animating={true} style={{ paddingVertical: 45 }} color={Constants.primaryColor}/> :
 				<>
-					<View>
+					<View style={{flex: 1, justifyContent: 'center'}}>
+                        <TotalAmount items={state.expenses} paramKey="amount" color={Constants.warnColor}></TotalAmount>
+                    </View>
+					<View style={{flex: 8}}>
 						<ExpenseListView 
 							expenses={state.expenses} 
 							onUpdate={togglePaid}

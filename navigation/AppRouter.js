@@ -1,9 +1,7 @@
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
-
 import { Provider as AuthProvider } from '../context/AuthContext';
 import { Provider as BudgetProvider } from '../context/BudgetContext';
-import { Provider as ExpenseProvider } from '../context/ExpenseContext';
 
 //IMPORT ROUTES
 import AuthLoading from '../screens/AuthLoading';
@@ -19,47 +17,45 @@ const MainStack = createStackNavigator();
 export default function AppRouter() {
     const MainNavigator = () => {
         return (
-            <MainStack.Navigator headerMode="none">
-                <AppStack.Screen
-                    name="Auth"
-                    component={AuthStack}
-                />
-                <AppStack.Screen
-                    name="Intro"
-                    component={IntroStack}
-                />
-                <AppStack.Screen
-                    options={{
-                        headerLeft: null
-                    }}
-                    name="Home"
-                    component={HomeStack}
-                />                   
-            </MainStack.Navigator>
+            <BudgetProvider>
+                <MainStack.Navigator headerMode="none">
+                    <AppStack.Screen
+                        name="Auth"
+                        component={AuthStack}
+                    />
+                    <AppStack.Screen
+                        name="Intro"
+                        component={IntroStack}
+                    />
+                    <AppStack.Screen
+                        options={{
+                            headerLeft: null
+                        }}
+                        name="Home"
+                        component={HomeStack}
+                    />
+                </MainStack.Navigator>
+            </BudgetProvider>
         );
     };
 
     return (
         <AuthProvider>
-            <BudgetProvider>
-                <ExpenseProvider>
-                    <AppStack.Navigator 
-                        headerMode="none"
-                        initialRouteName="Loading"
-                        options={{
-                            headerLeft: null
-                        }}>
-                        <AppStack.Screen
-                            name="Loading"
-                            component={AuthLoading}
-                        />
-                        <AppStack.Screen
-                            name="Main"
-                            component={MainNavigator}
-                        /> 
-                    </AppStack.Navigator>
-                </ExpenseProvider>
-            </BudgetProvider>
+            <AppStack.Navigator
+                headerMode="none"
+                initialRouteName="Loading"
+                options={{
+                    headerLeft: null
+                }}>
+                <AppStack.Screen
+                    name="Loading"
+                    component={AuthLoading}
+                />
+                <AppStack.Screen
+                    name="Main"
+                    component={MainNavigator}
+                />
+            </AppStack.Navigator>
         </AuthProvider>
     );
 }
