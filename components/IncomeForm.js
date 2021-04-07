@@ -5,12 +5,11 @@ import {
     TouchableWithoutFeedback, 
     Keyboard, 
     TouchableOpacity,
-    AsyncStorage
 } from 'react-native';
 import { Picker } from '@react-native-community/picker'
 import { useForm, Controller } from "react-hook-form";
 import { Text } from 'react-native-elements';
-import { TextInput, Button, ToggleButton } from 'react-native-paper';
+import { TextInput, Button, Caption } from 'react-native-paper';
 import { Constants } from '../constants/Theme';
 import Spacer from '../components/Spacer';
 import { constructDaysInMonth, nth, IncomeType } from '../services/utilHelper';
@@ -116,32 +115,37 @@ const IncomeForm = ({ onSubmitForm, onDelete, item, settings }) => {
                     }
                     
                     {!item &&
-                        <View style={styles.fieldContainer}>
-                            <View style={{ flex: 2, justifyContent: 'flex-end', paddingBottom: 4 }}>
-                                <Text style={styles.formLabel}>Type of Income </Text>
+                        <>
+                            <View style={styles.fieldContainer}>
+                                <View style={{ flex: 2, justifyContent: 'flex-end', paddingBottom: 4 }}>
+                                    <Text style={styles.formLabel}>Type of Income </Text>
+                                </View>
+                                <Controller
+                                    control={control}
+                                    render={({ onChange, value }) => (
+                                        <Picker
+                                            value={value}
+                                            type="outlined"
+                                            style={styles.pickerContainer}
+                                            itemStyle={styles.pickerItem}
+                                            selectedValue={value.toString()}
+                                            onValueChange={value => onChange(value ? parseInt(value) : "")}
+                                            value={value}
+                                        >
+                                            <Picker.Item label="Paycheck/Recurring" value="1" />
+                                            <Picker.Item label="Misc/One time" value="0" />
+                                        </Picker>
+                                    )}
+                                    name="incomeType"
+                                    defaultValue={item ? item.incomeType : "1"}
+                                />
                             </View>
-                            <Controller
-                                control={control}
-                                render={({ onChange, value }) => (
-                                    <Picker
-                                        value={value}
-                                        type="outlined"
-                                        style={styles.pickerContainer}
-                                        itemStyle={styles.pickerItem}
-                                        selectedValue={value.toString()}
-                                        onValueChange={value => onChange(value ? parseInt(value) : "")}
-                                        value={value}
-                                    >
-                                        <Picker.Item label="Paycheck/Recurring" value="1" />
-                                        <Picker.Item label="Misc/One time" value="0" />
-                                    </Picker>
-                                )}
-                                name="incomeType"
-                                defaultValue={item ? item.incomeType : "1"}
-                            />
-                        </View>
+                            <Caption style={{marginTop: 30}}>
+                                When selecting "Paycheck/Recurring", income will be added to this month & the following months. 
+                            </Caption>
+                        </>
                     }
-                    <View style={[styles.fieldContainer, { paddingTop: 30 }]}>
+                    <View style={[styles.fieldContainer, { paddingTop: 6 }]}>
                         <View style={{ flexDirection: 'row', flex: 2 }}>
                             <Text style={[styles.formLabel, { marginTop: 32 }]}>Day Expected</Text>
                         </View>
